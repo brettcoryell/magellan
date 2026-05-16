@@ -57,18 +57,12 @@ export default function JobCard({ job, stageCompleted }: JobCardProps) {
       </div>
 
       {/* Title */}
-      <div className="relative mb-2">
+      <div className="mb-2">
         {!isUnlocked ? (
-          <div className="relative">
-            <h3 className="text-base font-semibold text-slate-100 filter blur-sm select-none">
+          <div className="overflow-hidden rounded">
+            <h3 className="text-base font-semibold text-slate-100 blur-xl select-none pointer-events-none">
               {job.title}
             </h3>
-            <div className="absolute inset-0 flex items-center justify-start gap-1.5 pl-0.5">
-              <svg className="w-3.5 h-3.5 text-slate-500" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-              </svg>
-              <span className="text-xs text-slate-500">Complete all stages to unlock</span>
-            </div>
           </div>
         ) : (
           <h3 className="text-base font-semibold text-slate-100 group-hover:text-amber-400 transition-colors">
@@ -88,7 +82,7 @@ export default function JobCard({ job, stageCompleted }: JobCardProps) {
         {job.location && (
           <span>{job.location}</span>
         )}
-        {job.remote && (
+        {job.remote && !job.location?.toLowerCase().includes('remote') && (
           <>
             <span className="text-slate-700">·</span>
             <span className="bg-emerald-950/40 text-emerald-400 text-xs font-medium px-1.5 py-0.5 rounded border border-emerald-900/60">
