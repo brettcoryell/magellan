@@ -17,12 +17,14 @@ interface DashboardClientProps {
   initialProfile: CareerProfile | null
   initialJobs: JobPosting[]
   userId: string
+  buildSha: string
 }
 
 export default function DashboardClient({
   initialProfile,
   initialJobs,
   userId,
+  buildSha,
 }: DashboardClientProps) {
   const router = useRouter()
   const [profile, setProfile] = useState<CareerProfile | null>(initialProfile)
@@ -163,6 +165,10 @@ export default function DashboardClient({
                   <span className="text-xs">Refreshing your results...</span>
                 </div>
               )}
+            </div>
+            {/* Build version */}
+            <div className="mt-3 text-center">
+              <span className="font-mono text-xs text-slate-700">build {buildSha}</span>
             </div>
           </div>
 

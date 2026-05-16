@@ -56,11 +56,14 @@ export default async function DashboardPage() {
     }
   }
 
+  const buildSha = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? 'dev'
+
   return (
     <DashboardClient
       initialProfile={profile}
       initialJobs={jobs}
       userId={user.id}
+      buildSha={buildSha}
     />
   )
 }
