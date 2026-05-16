@@ -1,0 +1,79 @@
+Brett Coryell
+815-596-0304
+Chief Information Security Officer BrettCoryell@gmail.com
+
+Experienced CISO with CIO background
+Strategic thought leader with 15+ years leading large teams in highly regulated industries whose persuasive
+influence and adaptability repeatedly give rise to accelerated performance and improved service.
+
+Career Highlights Mentorship
+• Unlocked $9B private equity sale with InfoSec • Mentored by: Microsoft President and Board
+• Built next-generation cybersecurity AI member; Sprint COO; Emory EVP Finance;
+• Led regional ISP providing secure connectivity Disney VP Imagineering
+to 500+ hospitals, K-12 schools across Illinois
+• Presented cyber program to national audiences • Mentor to: 6 current or former CIOs; CISO of
+• Chased and caught nation-state bad actors the Year; Partners at two Big 4 consulting firms
+
+Leadership Profile
+Builds on strengths to get the most out of the team and teaches leaders at all levels to do the same.
+Warm, open, frequent communicator who lives by the motto, "If you want to go far, go together."
+Multi-industry success generated through understanding the detailed operation of both IT and the business.
+Fortune 100 Healthcare Higher Education Retail
+
+LEADERSHIP EXPERIENCE
+
+Principal Nov 2021 – Present
+Independent Consultant – Providing boutique CTO, CISO services to governmental entities and private companies
+Developed proprietary AI that predicts the next steps in a cyberattack before they happen with 90% accuracy.
+• Built or overhauled four end-to-end cybersecurity programs
+• Reviewed foreign cyber-agency methods for detecting poisoning during AI training
+• Conducted due diligence for investors on acquisition targets, security posture, CTO/CISO capabilities
+
+Global Chief Information Security Officer (CISO) Feb 2020 – Nov 2021
+Neighborly, Waco, TX – World's largest franchiser of home services; $3.3B in revenue; 5000 locations
+Responsible for all aspects of Information Security. Also ran global infrastructure and operations.
+Facilitated $9B private equity sale with 18-month crash program to put in missing InfoSec practices. Per KKR due
+diligence team, "the sale could not have happened without [the security program]."
+• Designed secure cloud infrastructure and DevSecOps procedures while migrating to AWS
+• Achieved PCI DSS compliance, won approval for 20+ policies, and launched our SOC
+• Lifted 30% of our top vendors from failing security score to passing with supply chain program
+
+Chief Information Officer (CIO / CTO) Apr 2014 – Apr 2018
+Northern Illinois University, Dekalb, IL – 250,000 internal users; 911 response; world's 5th fastest supercomputer
+President's Cabinet; owner of central IT (200+ staff); and leadership for over 30 distributed IT teams on campus.
+Tapped by President to lead strategic reprioritization of all university programs. Realized $50M savings in my
+department alone, saving hundreds of faculty jobs and giving millions in scholarships to students.
+• Worked with "government agencies" to eradicate nation state actors inside our border
+• Created secure facilities for Discover Financial, Chicago Board of Options, and 2 National Labs
+• Eliminated 99.4% of compromised accounts; became PCI, HIPAA, CJIS, FERPA, GDPR compliant
+• Provided secure, high-speed networking to 500+ hospitals, K-12 schools, and local governments
+
+Deputy Chief Information Officer (CIO) Aug 2007 – Apr 2014
+Emory University, Atlanta, GA – $4.2B revenue; 4.5M patient contacts/year at 400+ locations
+Served as university CIO running central IT (team of 320+). Also ran 70% of all healthcare IT systems.
+Supported strategy to expand through acquisitions by optimizing processes and inspiring a cohesive IT culture.
+• Partnered with CISO to secure campus, hospitals; CISO took strategy, I took operations
+• Enabled $200M/year increase in research funding with $20M ERP modernization
+• Created, taught "executive MBA for IT leaders" for my managers, six of whom are now CIOs
+
+EDUCATION
+• Doctoral candidate, Artificial Intelligence: University of Rennes, France (In Progress)
+• MS, Computer Science: University of Virginia, Charlottesville, VA, 1995
+• BS, Physics, Purdue University, West Lafayette, IN, 1990
+
+SKILLS & EXPERTISE
+
+Leadership & Strategy                    Management & Operations
+• IT governance                          • Enterprise risk management
+• Balanced scorecard                     • Project & portfolio management
+• Operational excellence                 • IT service management (ITIL, ITSM)
+
+Cloud & Infrastructure                   Enterprise Systems & Architecture
+• AWS & Azure migrations                 • ERP modernization
+• Infrastructure as Code (IaC)           • Product development
+• Kubernetes, Redshift, & CDN            • Microservices & API gateway
+
+Analytics & Optimization                 Cybersecurity & Compliance
+• Lean / Six Sigma                       • Data Management & MDM
+• Cognos & PowerBI                       • PCI, HIPAA, CJIS, GDPR compliance
+• Data Science & Machine learning        • IAM, SIEM, Threat intel, & Vuln management
