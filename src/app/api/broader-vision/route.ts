@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
     // Load all main jobs with signals and current scores
     const { data: mainJobs } = await supabase
       .from('job_postings')
-      .select('id, title, company, location, remote, url, source, fit_score, fit_tier, signals, salary_min, salary_max, fit_summary')
+      .select('id, profile_id, title, company, location, remote, url, source, fit_score, fit_tier, signals, salary_min, salary_max, fit_summary')
       .eq('profile_id', profileId)
       .eq('source_type', 'main')
       .not('signals', 'eq', '{}')
@@ -131,7 +131,7 @@ export async function GET(request: NextRequest) {
     // Load adjacent jobs (already stored by Stage 6 submit)
     const { data: adjacentJobs } = await supabase
       .from('job_postings')
-      .select('id, title, company, location, remote, url, source, fit_score, fit_tier, salary_min, salary_max, fit_summary, source_type')
+      .select('id, profile_id, title, company, location, remote, url, source, fit_score, fit_tier, salary_min, salary_max, fit_summary, source_type')
       .eq('profile_id', profileId)
       .eq('source_type', 'adjacent')
       .order('fit_score', { ascending: false })

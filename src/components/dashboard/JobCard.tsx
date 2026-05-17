@@ -66,16 +66,13 @@ function FitChip({ signal, positive }: { signal: FitSignal; positive: boolean })
   )
 }
 
-function AnalysisPanel({ jobId, profileId, stageCompleted }: { jobId: string; profileId: string; stageCompleted: number }) {
+function AnalysisPanel({ jobId, profileId }: { jobId: string; profileId: string }) {
   const [open, setOpen] = useState(false)
   const [analysis, setAnalysis] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const isDisabled = stageCompleted < 5
-
   const handleClick = async () => {
-    if (isDisabled) return
     if (!open) {
       setOpen(true)
       if (!analysis) {
@@ -101,24 +98,18 @@ function AnalysisPanel({ jobId, profileId, stageCompleted }: { jobId: string; pr
     }
   }
 
-  const label = stageCompleted >= 6 ? 'Full Analysis' : 'Analyze Fit'
-
   return (
     <div>
       <button
         type="button"
         onClick={handleClick}
-        disabled={isDisabled}
-        title={isDisabled ? 'Complete the Skills Match stage to unlock fit analysis' : undefined}
         className={`text-xs font-medium px-3 py-1.5 rounded-lg border transition-all duration-200 ${
-          isDisabled
-            ? 'border-slate-700 text-slate-600 cursor-not-allowed'
-            : open
+          open
             ? 'border-amber-600 bg-amber-500/10 text-amber-400'
             : 'border-slate-600 text-slate-400 hover:border-amber-600 hover:text-amber-400'
         }`}
       >
-        {open ? '▲ ' : '▼ '}{label}
+        {open ? '▲ ' : '▼ '}Full Analysis
       </button>
       {open && (
         <div className="mt-3 border border-slate-700 rounded-lg p-4 bg-slate-800/60">
@@ -293,9 +284,9 @@ export default function JobCard({ job, stageCompleted, onIgnore, onRestore }: Jo
           </span>
         )}
         <div className="ml-auto flex items-center gap-2 flex-wrap">
-          {/* Analyze Fit (Stage 5+) */}
-          {stageCompleted >= 4 && (
-            <AnalysisPanel jobId={job.id} profileId={job.profile_id} stageCompleted={stageCompleted} />
+          {/* Full Analysis — unlocks after Stage 6 (STAR story) */}
+          {stageCompleted >= 6 && (
+            <AnalysisPanel jobId={job.id} profileId={job.profile_id} />
           )}
           {onIgnore && (
             <button
