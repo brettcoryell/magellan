@@ -43,6 +43,7 @@ export default function DashboardClient({
   const [navigating, setNavigating] = useState(false)
 
   const supabase = createClient()
+  const profileId = profile?.id ?? null
 
   const refetchJobs = useCallback(async (profileId: string) => {
     const response = await fetch(`/api/jobs?profileId=${profileId}&showIgnored=true`)
@@ -151,7 +152,6 @@ export default function DashboardClient({
 
   const stageCompleted = profile?.stage_completed ?? 0
   const sourceErrors = ((profile?.preference_profile as Record<string, unknown>)?.source_errors as Record<string, string> | undefined) || {}
-  const profileId = profile?.id ?? null
 
   const schemaWarnings = (profile?.schema_warnings || []) as Array<{ stage: number }>
   const schemaWarningStages = schemaWarnings.map(w => w.stage)
