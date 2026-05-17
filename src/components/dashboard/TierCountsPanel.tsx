@@ -14,34 +14,32 @@ export default function TierCountsPanel({ jobs, active }: TierCountsPanelProps) 
   const other = mainJobs.filter(j => j.fit_tier === 'other').length
 
   return (
-    <div className={`bg-slate-900 border rounded-xl p-5 transition-all duration-400 ${
+    <div className={`rounded-xl border flex-1 flex flex-col items-center justify-center p-4 transition-all duration-400 ${
       active ? 'border-slate-700 opacity-100' : 'border-slate-800 opacity-40'
-    }`}>
-      <h3 className={`text-xs font-semibold uppercase tracking-wider mb-4 ${
-        active ? 'text-slate-400' : 'text-slate-600'
-      }`}>
-        Fit Tiers
-      </h3>
-      <div className="grid grid-cols-3 gap-3">
+    } bg-slate-900`}>
+      <div className="grid grid-cols-3 gap-2 w-full">
         <div className="text-center">
-          <div className={`text-2xl font-bold ${active ? 'text-amber-400' : 'text-slate-700'}`}>
+          <div className={`text-xl font-bold ${active ? 'text-amber-400' : 'text-slate-700'}`}>
             {active ? great : '—'}
           </div>
-          <div className="text-xs text-slate-500 mt-1">Great</div>
+          <div className="text-xs text-slate-500 mt-0.5">Great</div>
         </div>
         <div className="text-center">
-          <div className={`text-2xl font-bold ${active ? 'text-sky-400' : 'text-slate-700'}`}>
+          <div className={`text-xl font-bold ${active ? 'text-sky-400' : 'text-slate-700'}`}>
             {active ? good : '—'}
           </div>
-          <div className="text-xs text-slate-500 mt-1">Good</div>
+          <div className="text-xs text-slate-500 mt-0.5">Good</div>
         </div>
         <div className="text-center">
-          <div className={`text-2xl font-bold ${active ? 'text-slate-400' : 'text-slate-700'}`}>
+          <div className={`text-xl font-bold ${active ? 'text-slate-400' : 'text-slate-700'}`}>
             {active ? other : '—'}
           </div>
-          <div className="text-xs text-slate-500 mt-1">Other</div>
+          <div className="text-xs text-slate-500 mt-0.5">Other</div>
         </div>
       </div>
+      <p className={`text-xs font-semibold uppercase tracking-wider mt-2 ${active ? 'text-amber-400' : 'text-slate-600'}`}>
+        Fit Tiers
+      </p>
     </div>
   )
 }

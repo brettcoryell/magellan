@@ -22,10 +22,25 @@ export async function POST(request: NextRequest) {
 
     const extraction = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
-      max_tokens: 512,
+      max_tokens: 768,
       messages: [{
         role: 'user',
-        content: `Extract from this resume: current job title, years of experience, industry, key skills (up to 10), most recent company type. Return as JSON only.\n\n${resumeText.slice(0, 8000)}`
+        content: `Extract from this resume. Return ONLY valid JSON with these EXACT field names — do not rename them:
+{
+  "job_title": "most recent job title verbatim",
+  "seniority_level": "entry|mid|senior|director|vp|c-level",
+  "years_experience": 0,
+  "industries": ["industry1"],
+  "key_skills": ["skill1", "skill2"],
+  "company_type": "startup|enterprise|agency|consulting|nonprofit|government|unclear",
+  "job_search_titles": ["title1", "title2", "title3"]
+}
+
+seniority_level rules: entry=<3 yrs or IC contributor with no lead experience, mid=3-7 yrs, senior=7-12 yrs IC, director=first-line leader, vp=VP/SVP/EVP, c-level=C-suite or equivalent (CIO, CISO, CTO, CEO, COO, etc.)
+job_search_titles: 3-4 realistic job titles this person should search for, ordered by fit. Include both the exact title they held AND lateral/aspirational variations (e.g. ["Chief Information Officer", "CIO", "VP of Technology", "Chief Digital Officer"]).
+
+Resume:
+${resumeText.slice(0, 8000)}`
       }]
     })
 

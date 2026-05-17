@@ -5,32 +5,41 @@ import { JobPosting } from '@/lib/types'
 interface SourcesPanelProps {
   jobs: JobPosting[]
   active: boolean
+  stageCompleted: number
   loading?: boolean
 }
 
-export default function SourcesPanel({ jobs, active, loading }: SourcesPanelProps) {
-  const remotiveCount = jobs.filter(j => j.source === 'remotive').length
-  const adzunaCount = jobs.filter(j => j.source === 'adzuna').length
+const SOURCE_CONFIG = [
+  {
+    key: 'remotive',
+    label: 'Remotive',
+    description: 'Remote-first jobs',
+    color: 'text-emerald-400',
+    bg: 'bg-emerald-950/50 border-emerald-800/60',
+    dot: 'bg-emerald-400',
+    activatesAt: 2,
+  },
+  {
+    key: 'adzuna',
+    label: 'Adzuna',
+    description: 'Broad job aggregator',
+    color: 'text-blue-400',
+    bg: 'bg-blue-950/50 border-blue-800/60',
+    dot: 'bg-blue-400',
+    activatesAt: 3,
+  },
+  {
+    key: 'jsearch',
+    label: 'JSearch',
+    description: 'LinkedIn, Indeed & more',
+    color: 'text-violet-400',
+    bg: 'bg-violet-950/50 border-violet-800/60',
+    dot: 'bg-violet-400',
+    activatesAt: 4,
+  },
+]
 
-  const SOURCES = [
-    {
-      key: 'remotive',
-      label: 'Remotive',
-      count: remotiveCount,
-      color: 'text-emerald-400',
-      bg: 'bg-emerald-950/50 border-emerald-800/60',
-      dot: 'bg-emerald-400',
-    },
-    {
-      key: 'adzuna',
-      label: 'Adzuna',
-      count: adzunaCount,
-      color: 'text-blue-400',
-      bg: 'bg-blue-950/50 border-blue-800/60',
-      dot: 'bg-blue-400',
-    },
-  ]
-
+export default function SourcesPanel({ jobs, active, stageCompleted, loading }: SourcesPanelProps) {
   return (
     <div className={`rounded-xl border p-5 transition-all duration-400 ${
       active
@@ -55,49 +64,56 @@ export default function SourcesPanel({ jobs, active, loading }: SourcesPanelProp
         )}
       </div>
 
-      {!active ? (
-        <div className="flex gap-3">
-          {SOURCES.map(src => (
+      <div className="space-y-2">
+        {SOURCE_CONFIG.map(src => {
+          const count = jobs.filter(j => j.source === src.key).length
+          const hasReached = stageCompleted >= src.activatesAt
+          const isActive = active && hasReached
+          const hasJobs = count > 0
+
+          return (
             <div
               key={src.key}
-              className="flex items-center gap-2 bg-slate-800/40 border border-slate-800/60 rounded-lg px-3 py-2"
-            >
-              <div className="w-1.5 h-1.5 rounded-full bg-slate-700" />
-              <span className="text-slate-600 text-sm font-medium">{src.label}</span>
-              <span className="text-slate-700 font-mono text-sm">--</span>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="flex flex-wrap gap-3">
-          {SOURCES.map(src => (
-            <div
-              key={src.key}
-              className={`flex items-center gap-2.5 rounded-lg px-3 py-2 border transition-all duration-300 ${
-                src.count > 0 ? src.bg : 'bg-slate-800/40 border-slate-800/60'
+              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 border transition-all duration-300 ${
+                isActive && hasJobs
+                  ? src.bg
+                  : isActive
+                  ? 'bg-slate-800/40 border-slate-700/60'
+                  : 'bg-slate-800/20 border-slate-800/40 opacity-40'
               }`}
             >
-              <div className={`w-2 h-2 rounded-full ${src.count > 0 ? src.dot : 'bg-slate-600'}`} />
-              <span className={`text-sm font-medium ${src.count > 0 ? src.color : 'text-slate-500'}`}>
-                {src.label}
-              </span>
-              <span className={`font-mono text-sm font-bold ${src.count > 0 ? src.color : 'text-slate-600'}`}>
-                {src.count}
+              <div className={`w-2 h-2 rounded-full shrink-0 ${
+                isActive && hasJobs ? src.dot : 'bg-slate-600'
+              }`} />
+              <div className="flex-1 min-w-0">
+                <span className={`text-sm font-medium ${
+                  isActive && hasJobs ? src.color : isActive ? 'text-slate-500' : 'text-slate-600'
+                }`}>
+                  {src.label}
+                </span>
+                <span className={`text-xs ml-1.5 ${isActive && hasJobs ? 'text-slate-500' : 'text-slate-700'}`}>
+                  {src.description}
+                </span>
+              </div>
+              <span className={`font-mono text-sm font-bold shrink-0 ${
+                isActive && hasJobs ? src.color : 'text-slate-600'
+              }`}>
+                {isActive ? (hasJobs ? count : '0') : '—'}
               </span>
             </div>
-          ))}
+          )
+        })}
 
-          {loading && (
-            <div className="flex items-center gap-2 bg-amber-950/30 border border-amber-800/40 rounded-lg px-3 py-2">
-              <svg className="animate-spin w-3.5 h-3.5 text-amber-400" viewBox="0 0 24 24" fill="none">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
-              <span className="text-amber-400 text-sm">Searching...</span>
-            </div>
-          )}
-        </div>
-      )}
+        {loading && (
+          <div className="flex items-center gap-2 bg-amber-950/30 border border-amber-800/40 rounded-lg px-3 py-2.5">
+            <svg className="animate-spin w-3.5 h-3.5 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            <span className="text-amber-400 text-sm">Searching…</span>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

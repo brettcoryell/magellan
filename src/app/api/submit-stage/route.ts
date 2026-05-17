@@ -42,7 +42,7 @@ async function extractAspiration(profileJson: string, aspirationText: string) {
 And their stated aspiration: ${aspirationText}
 
 1. Extract aspiration signals as JSON
-2. Generate 2 search queries (different keyword combos)
+2. Generate 2 specific job search queries. Include seniority/level qualifiers that match the candidate's experience (e.g. "senior director", "VP", "CIO", "chief", "executive"). Do NOT generate generic queries without level context.
 
 Return JSON only:
 {
@@ -53,7 +53,7 @@ Return JSON only:
     "growth_direction": "unclear",
     "keywords": []
   },
-  "queries": ["query 1", "query 2"],
+  "queries": ["query 1 with seniority", "query 2 with seniority"],
   "confidence": 0.8
 }`
     }]
@@ -151,10 +151,14 @@ search_terms: 2-3 JSearch queries for adjacent role discovery based on their int
   return match ? JSON.parse(match[0]) : { adjacent_interest: [], adjacent_rejection: [], search_terms: [], confidence: 0.5 }
 }
 
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, ' ').replace(/&[a-z]+;/gi, ' ').replace(/\s+/g, ' ').trim()
+}
+
 async function extractJobSignals(jobs: Array<{ id: string; description: string }>) {
   if (!jobs.length) return []
   const jobsText = jobs.map((j) =>
-    `JOB_ID:${j.id}\nDESCRIPTION:\n${j.description?.slice(0, 1000)}`
+    `JOB_ID:${j.id}\nDESCRIPTION:\n${stripHtml(j.description || '').slice(0, 1000)}`
   ).join('\n\n---\n\n')
 
   const response = await anthropic.messages.create({
@@ -476,11 +480,11 @@ export async function POST(request: NextRequest) {
         signal_confidence: signal_confidence as SignalConfidence,
       }
 
-      const titleQuery = (profile.preference_profile as Record<string, unknown>)?.current_job_title as string ||
-                         (profile.preference_profile as Record<string, unknown>)?.job_title as string || 'remote work'
-      const skillsArr = (profile.preference_profile as Record<string, unknown>)?.key_skills as string[] || []
-      const skillQuery = skillsArr.slice(0, 3).join(' ')
-      const queries = [titleQuery, skillQuery].filter(Boolean)
+      // Prefer job_search_titles set at resume upload; fall back gracefully
+      const pref2 = profile.preference_profile as Record<string, unknown>
+      const searchTitles2 = (pref2?.job_search_titles as string[]) || []
+      const fallbackTitle2 = (pref2?.job_title as string) || 'technology leadership'
+      const queries = searchTitles2.length > 0 ? searchTitles2.slice(0, 2) : [fallbackTitle2]
 
       const allRawJobs: ReturnType<typeof normalizeRemotiveJob>[] = []
       for (const q of queries) {
@@ -576,14 +580,18 @@ export async function POST(request: NextRequest) {
         signal_confidence: signal_confidence as SignalConfidence,
       }
 
-      // Build JSearch queries from profile
-      const titleQuery = (profile.preference_profile as Record<string, unknown>)?.job_title as string ||
-                         (profile.preference_profile as Record<string, unknown>)?.current_job_title as string
-      const funcQuery = updatedPref.desired_functions?.slice(0, 2).join(' ') || ''
-      const jSearchQueries = [titleQuery, funcQuery].filter(Boolean)
+      // JSearch queries: use all job_search_titles from resume extraction (exec-level aware)
+      const pref4 = profile.preference_profile as Record<string, unknown>
+      const searchTitles4 = (pref4?.job_search_titles as string[]) || []
+      const fallbackTitle4 = (pref4?.job_title as string) || (updatedPref.desired_functions?.[0]) || 'executive leadership'
+      const jSearchQueries = searchTitles4.length > 0
+        ? searchTitles4.slice(0, 3)
+        : [fallbackTitle4]
+
+      console.log('[submit-stage] Stage 4 JSearch queries:', jSearchQueries)
 
       const allRawJobs: ReturnType<typeof normalizeJSearchJob>[] = []
-      for (const q of jSearchQueries.slice(0, 2)) {
+      for (const q of jSearchQueries) {
         const jobs = await fetchJSearch(q)
         for (const j of jobs) allRawJobs.push(normalizeJSearchJob(j as Record<string, unknown>, profileId, 'main'))
       }

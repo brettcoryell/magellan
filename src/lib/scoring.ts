@@ -3,8 +3,31 @@ import { PreferenceProfile, JobSignals, SignalConfidence } from './types'
 const RAW_MIN = -0.85
 const RAW_MAX = 1.60
 
+const SENIORITY_RANK: Record<string, number> = {
+  'entry': 1, 'mid': 2, 'senior': 3, 'director': 4, 'vp': 5, 'c-level': 6,
+}
+
 function conf(confidence: Partial<SignalConfidence> | undefined, key: keyof SignalConfidence): number {
   return confidence?.[key] ?? 0.5
+}
+
+// Returns true if any token (>3 chars) from `a` appears in `b` or vice versa
+function tokenOverlap(a: string, b: string): boolean {
+  const tokens = (s: string) => s.toLowerCase().split(/[^a-z0-9]+/).filter(t => t.length > 3)
+  const aT = tokens(a)
+  const bT = new Set(tokens(b))
+  return aT.some(t => bT.has(t))
+}
+
+// Returns overlap count between two string arrays (token-based)
+function arrayOverlapCount(desired: string[], available: string[]): number {
+  const tokens = (s: string) => s.toLowerCase().split(/[^a-z0-9]+/).filter(t => t.length > 3)
+  const availTokens = new Set(available.flatMap(tokens))
+  return desired.flatMap(tokens).filter(t => availTokens.has(t)).length
+}
+
+export function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, ' ').replace(/&[a-z]+;/gi, ' ').replace(/\s+/g, ' ').trim()
 }
 
 export function scoreJob(
@@ -21,14 +44,32 @@ export function scoreJob(
   const cValues = conf(confidence, 'values')
   const cCapabilities = conf(confidence, 'capabilities')
 
-  // Stage 2 — Constraint penalties
+  // ── Seniority mismatch (Stage 1, always active, no confidence damping) ──
+  const profileSeniority = profile.seniority_level
+  if (profileSeniority && signals.seniority && signals.seniority !== 'unclear') {
+    const profileRank = SENIORITY_RANK[profileSeniority] ?? 0
+    const jobRank = SENIORITY_RANK[signals.seniority] ?? 0
+    const gap = profileRank - jobRank
+    if (gap >= 2) {
+      raw -= 0.45
+      penalties.push('Role well below experience level')
+    } else if (gap === 1) {
+      raw -= 0.2
+      penalties.push('Role below experience level')
+    } else if (gap === 0) {
+      raw += 0.15
+      reasons.push('Seniority match')
+    }
+  }
+
+  // ── Stage 2 — Constraint penalties ──────────────────────────────────────
   if (profile.excluded_industries?.some(i =>
-    signals.industries?.map(x => x.toLowerCase()).includes(i.toLowerCase())
+    signals.industries?.some(ji => tokenOverlap(i, ji))
   )) {
     raw -= 0.3 * cConstraints
     penalties.push('Excluded industry')
   }
-  if (signals.company_type && profile.excluded_company_types?.map(x => x.toLowerCase()).includes(signals.company_type.toLowerCase())) {
+  if (signals.company_type && profile.excluded_company_types?.some(t => tokenOverlap(t, signals.company_type!))) {
     raw -= 0.3 * cConstraints
     penalties.push('Excluded company type')
   }
@@ -37,25 +78,26 @@ export function scoreJob(
     penalties.push('Not remote')
   }
   if (profile.excluded_locations?.some(l =>
-    signals.locations?.map(x => x.toLowerCase()).includes(l.toLowerCase())
+    signals.locations?.some(jl => tokenOverlap(l, jl))
   )) {
     raw -= 0.2 * cConstraints
     penalties.push('Excluded location')
   }
-  if (profile.excluded_keywords?.some(k =>
-    signals.key_requirements?.join(' ').toLowerCase().includes(k.toLowerCase())
-  )) {
+  const reqText = signals.key_requirements?.join(' ') ?? ''
+  if (profile.excluded_keywords?.some(k => reqText.toLowerCase().includes(k.toLowerCase()))) {
     raw -= 0.15 * cConstraints
     penalties.push('Excluded keyword match')
   }
 
-  // Stage 3 — Aspiration bonuses
-  if (profile.desired_functions?.some(f =>
-    signals.primary_function?.toLowerCase().includes(f.toLowerCase())
-  )) {
-    raw += 0.2 * cAspiration
-    reasons.push('Role function match')
+  // ── Stage 3 — Aspiration bonuses ────────────────────────────────────────
+  // Function match (token-based, bidirectional)
+  if (profile.desired_functions?.length && signals.primary_function) {
+    if (profile.desired_functions.some(f => tokenOverlap(f, signals.primary_function!))) {
+      raw += 0.2 * cAspiration
+      reasons.push('Function match')
+    }
   }
+  // Growth direction
   if (profile.growth_direction === 'leadership' && ['manager', 'leader'].includes(signals.role_type ?? '')) {
     raw += 0.15 * cAspiration
     reasons.push('Leadership direction match')
@@ -64,53 +106,58 @@ export function scoreJob(
     raw += 0.15 * cAspiration
     reasons.push('IC direction match')
   }
-  if (profile.keywords?.some(k =>
-    signals.key_requirements?.join(' ').toLowerCase().includes(k.toLowerCase())
-  )) {
-    raw += 0.1 * cAspiration
-    reasons.push('Keyword match')
+  // Keywords vs requirements (token overlap)
+  const keywordMatches = arrayOverlapCount(profile.keywords ?? [], signals.key_requirements ?? [])
+  if (keywordMatches > 0) {
+    raw += Math.min(0.15, keywordMatches * 0.05) * cAspiration
+    reasons.push(`Keyword match (${keywordMatches})`)
   }
+  // Desired industry
   if (profile.desired_industries?.some(i =>
-    signals.industries?.map(x => x.toLowerCase()).includes(i.toLowerCase())
+    signals.industries?.some(ji => tokenOverlap(i, ji))
   )) {
     raw += 0.1 * cAspiration
     reasons.push('Desired industry match')
   }
+  // Company type match
+  if (profile.desired_company_types?.length && signals.company_type) {
+    if (profile.desired_company_types.some(t => tokenOverlap(t, signals.company_type!))) {
+      raw += 0.08 * cAspiration
+      reasons.push('Company type match')
+    }
+  }
 
-  // Stage 4 — Values / culture bonuses
+  // ── Stage 4 — Values / culture bonuses ──────────────────────────────────
   if (profile.values_signals?.length && signals.culture_signals?.length) {
-    const overlap = profile.values_signals.filter(v =>
-      signals.culture_signals!.some(c => c.toLowerCase().includes(v.toLowerCase()))
-    )
-    if (overlap.length > 0) {
-      raw += Math.min(0.2, overlap.length * 0.07) * cValues
-      reasons.push(`Culture overlap: ${overlap.slice(0, 2).join(', ')}`)
+    const overlap = arrayOverlapCount(profile.values_signals, signals.culture_signals)
+    if (overlap > 0) {
+      raw += Math.min(0.2, overlap * 0.07) * cValues
+      reasons.push(`Culture overlap (${overlap})`)
     }
   }
   if (profile.work_style === 'autonomous' && signals.culture_signals?.some(c =>
-    c.toLowerCase().includes('autonomous') || c.toLowerCase().includes('self-directed')
+    tokenOverlap(c, 'autonomous self-directed independent')
   )) {
-    raw += 0.1 * cValues
+    raw += 0.08 * cValues
     reasons.push('Work style match')
   }
   if (profile.work_style === 'collaborative' && signals.culture_signals?.some(c =>
-    c.toLowerCase().includes('collaborative') || c.toLowerCase().includes('team')
+    tokenOverlap(c, 'collaborative team cross-functional')
   )) {
-    raw += 0.1 * cValues
+    raw += 0.08 * cValues
     reasons.push('Work style match')
   }
 
-  // Stage 5 — Capabilities bonuses
+  // ── Stage 5 — Capabilities bonuses ──────────────────────────────────────
   if (profile.demonstrated_capabilities?.length && signals.key_requirements?.length) {
-    const overlap = profile.demonstrated_capabilities.filter(cap =>
-      signals.key_requirements!.some(req => req.toLowerCase().includes(cap.toLowerCase()))
-    )
-    if (overlap.length > 0) {
-      raw += Math.min(0.25, overlap.length * 0.08) * cCapabilities
-      reasons.push(`Skills match: ${overlap.slice(0, 2).join(', ')}`)
+    const overlap = arrayOverlapCount(profile.demonstrated_capabilities, signals.key_requirements)
+    if (overlap > 0) {
+      raw += Math.min(0.25, overlap * 0.08) * cCapabilities
+      reasons.push(`Skills match (${overlap})`)
     }
   }
-  if (profile.problem_domain && signals.primary_function?.toLowerCase().includes(profile.problem_domain.toLowerCase())) {
+  if (profile.problem_domain && signals.primary_function &&
+      tokenOverlap(profile.problem_domain, signals.primary_function)) {
     raw += 0.1 * cCapabilities
     reasons.push('Problem domain match')
   }

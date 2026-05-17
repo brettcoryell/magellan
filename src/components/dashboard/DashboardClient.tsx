@@ -125,25 +125,58 @@ export default function DashboardClient({
         <div className="flex gap-8 items-start">
           {/* Left column - sticky sidebar */}
           <div className="w-72 shrink-0 sticky top-8">
-            {/* Logo + sign out */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 bg-amber-500 rounded-lg flex items-center justify-center">
-                  <svg className="w-4 h-4 text-slate-950" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-                  </svg>
+            {/* Logo + sign out + reset */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 bg-amber-500 rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-slate-950" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                    </svg>
+                  </div>
+                  <span className="text-amber-400 font-semibold text-sm tracking-tight">Career Explorer</span>
                 </div>
-                <span className="text-amber-400 font-semibold text-sm tracking-tight">Career Explorer</span>
+                <div className="flex items-center gap-3">
+                  {profile && !showResetConfirm && (
+                    <button
+                      onClick={() => setShowResetConfirm(true)}
+                      className="text-slate-600 hover:text-slate-400 text-xs transition-colors"
+                    >
+                      Start over
+                    </button>
+                  )}
+                  <button
+                    onClick={handleSignOut}
+                    className="text-slate-500 hover:text-slate-300 text-xs transition-colors flex items-center gap-1"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    Sign out
+                  </button>
+                </div>
               </div>
-              <button
-                onClick={handleSignOut}
-                className="text-slate-500 hover:text-slate-300 text-xs transition-colors flex items-center gap-1"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-                Sign out
-              </button>
+              {showResetConfirm && (
+                <div className="mt-2 bg-slate-900 border border-slate-700 rounded-xl p-3 space-y-2">
+                  <p className="text-xs text-slate-300">Delete all results and start over?</p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setShowResetConfirm(false)}
+                      disabled={resetting}
+                      className="flex-1 text-xs py-1.5 rounded-lg border border-slate-700 text-slate-400 hover:text-slate-200 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleReset}
+                      disabled={resetting}
+                      className="flex-1 text-xs py-1.5 rounded-lg bg-red-900/60 border border-red-800/60 text-red-300 hover:bg-red-800/60 transition-colors disabled:opacity-50"
+                    >
+                      {resetting ? 'Resetting…' : 'Yes, reset'}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Stage progress */}
@@ -197,42 +230,6 @@ export default function DashboardClient({
               )}
             </div>
 
-            {/* Reset button */}
-            {profile && (
-              <div className="mt-3">
-                {!showResetConfirm ? (
-                  <button
-                    onClick={() => setShowResetConfirm(true)}
-                    className="w-full text-xs text-slate-600 hover:text-slate-400 py-2 transition-colors"
-                  >
-                    Start over
-                  </button>
-                ) : (
-                  <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 text-center space-y-3">
-                    <p className="text-xs text-slate-300">
-                      This will delete all your results and start over.
-                    </p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setShowResetConfirm(false)}
-                        disabled={resetting}
-                        className="flex-1 text-xs py-1.5 rounded-lg border border-slate-700 text-slate-400 hover:text-slate-200 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={handleReset}
-                        disabled={resetting}
-                        className="flex-1 text-xs py-1.5 rounded-lg bg-red-900/60 border border-red-800/60 text-red-300 hover:bg-red-800/60 transition-colors disabled:opacity-50"
-                      >
-                        {resetting ? 'Resetting…' : 'Yes, reset'}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
             {/* Build version */}
             <div className="mt-3 text-center">
               <span className="font-mono text-xs text-slate-700">build {buildSha}</span>
@@ -241,28 +238,42 @@ export default function DashboardClient({
 
           {/* Right column */}
           <div className="flex-1 min-w-0 space-y-4">
-            {/* Top row: Profile + Total Jobs + Tier Counts */}
+            {/* Top row: Profile (2/3) + stacked Total Jobs & Tier Counts (1/3) */}
             <div className="grid grid-cols-3 gap-4">
-              <ProfilePanel
-                profile={profile}
-                active={stageCompleted >= 1}
-              />
-              <TotalJobsPanel
-                count={jobs.filter(j => j.source_type === 'main').length}
-                active={jobs.length > 0}
-              />
-              <TierCountsPanel
-                jobs={jobs}
-                active={stageCompleted >= 4}
-              />
+              <div className="col-span-2">
+                <ProfilePanel
+                  profile={profile}
+                  active={stageCompleted >= 1}
+                />
+              </div>
+              <div className="flex flex-col gap-4">
+                <TotalJobsPanel
+                  count={jobs.filter(j => j.source_type === 'main').length}
+                  active={jobs.length > 0}
+                />
+                <TierCountsPanel
+                  jobs={jobs}
+                  active={stageCompleted >= 4}
+                />
+              </div>
             </div>
 
-            {/* Sources panel */}
+            {/* Sources panel — each source on its own line */}
             <SourcesPanel
               jobs={jobs}
               active={jobs.length > 0}
+              stageCompleted={stageCompleted}
               loading={stageLoading !== null}
             />
+
+            {/* Broader Vision panel — at top of job section */}
+            {profileId && stageCompleted >= 6 && (
+              <BroaderVisionPanel
+                profileId={profileId}
+                active={stageCompleted >= 6}
+                onAddToResults={handleAddToResults}
+              />
+            )}
 
             {/* Jobs list */}
             <div>
@@ -284,15 +295,6 @@ export default function DashboardClient({
                 stageCompleted={stageCompleted}
               />
             </div>
-
-            {/* Broader Vision panel (Stage 6+) */}
-            {profileId && (
-              <BroaderVisionPanel
-                profileId={profileId}
-                active={stageCompleted >= 6}
-                onAddToResults={handleAddToResults}
-              />
-            )}
           </div>
         </div>
       </div>

@@ -8,6 +8,14 @@ export interface SignalConfidence {
 }
 
 export interface PreferenceProfile {
+  // Stage 1 — Resume extraction
+  job_title: string
+  seniority_level: 'entry' | 'mid' | 'senior' | 'director' | 'vp' | 'c-level'
+  years_experience: number
+  industries: string[]
+  key_skills: string[]
+  company_type: string
+  job_search_titles: string[]
   // Stage 2 — Hard Constraints
   excluded_industries: string[]
   excluded_company_types: string[]
