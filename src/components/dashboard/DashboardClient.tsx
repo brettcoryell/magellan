@@ -35,6 +35,7 @@ export default function DashboardClient({
   const [profile, setProfile] = useState<CareerProfile | null>(initialProfile)
   const [jobs, setJobs] = useState<JobPosting[]>(initialJobs)
   const [stageLoading, setStageLoading] = useState<number | null>(null)
+  const [submittingStage, setSubmittingStage] = useState<number | null>(null)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [resetting, setResetting] = useState(false)
 
@@ -197,10 +198,18 @@ export default function DashboardClient({
                 <ConstraintsForm profileId={profileId} onComplete={() => handleStageComplete(2)} />
               )}
               {showAspiration && profileId && (
-                <AspirationForm profileId={profileId} onComplete={() => handleStageComplete(3)} />
+                <AspirationForm
+                  profileId={profileId}
+                  onComplete={() => handleStageComplete(3)}
+                  onLoadingChange={(l) => setSubmittingStage(l ? 3 : null)}
+                />
               )}
               {showValues && profileId && (
-                <ValuesForm profileId={profileId} onComplete={() => handleStageComplete(4)} />
+                <ValuesForm
+                  profileId={profileId}
+                  onComplete={() => handleStageComplete(4)}
+                  onLoadingChange={(l) => setSubmittingStage(l ? 4 : null)}
+                />
               )}
               {showCapabilities && profileId && (
                 <CapabilitiesForm profileId={profileId} onComplete={() => handleStageComplete(5)} />
@@ -264,6 +273,7 @@ export default function DashboardClient({
               active={jobs.length > 0}
               stageCompleted={stageCompleted}
               loading={stageLoading !== null}
+              submittingStage={submittingStage}
             />
 
             {/* Broader Vision panel — at top of job section */}

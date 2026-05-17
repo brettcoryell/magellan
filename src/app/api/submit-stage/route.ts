@@ -314,7 +314,7 @@ function normalizeRemotiveJob(job: Record<string, unknown>, profileId: string) {
   }
 }
 
-function normalizeAdzunaJob(job: Record<string, unknown>, profileId: string) {
+function normalizeAdzunaJob(job: Record<string, unknown>, profileId: string, sourceType = 'main') {
   const title = (job.title as string) || ''
   const company = ((job.company as Record<string, unknown>)?.display_name as string) || ''
   const location = ((job.location as Record<string, unknown>)?.display_name as string) || ''
@@ -336,7 +336,7 @@ function normalizeAdzunaJob(job: Record<string, unknown>, profileId: string) {
     signals: {},
     fit_score: null,
     fit_tier: null,
-    source_type: 'main',
+    source_type: sourceType,
   }
 }
 
@@ -735,11 +735,26 @@ export async function POST(request: NextRequest) {
       }
 
       // JSearch re-query with adjacent terms → source_type='adjacent'
-      const allAdjacentJobs: ReturnType<typeof normalizeJSearchJob>[] = []
-      for (const term of (searchTerms as string[]).slice(0, 3)) {
+      // Falls back to Adzuna when JSearch is unavailable (403)
+      const sanitizeForAdzuna6 = (q: string) => q.split(/ OR /i)[0].trim().split(' ').slice(0, 5).join(' ')
+      const adjTerms = (searchTerms as string[]).slice(0, 3)
+      console.log('[submit-stage] Stage 6 adjacent search terms:', adjTerms)
+
+      const allAdjacentJobs: Array<ReturnType<typeof normalizeJSearchJob> | ReturnType<typeof normalizeAdzunaJob>> = []
+      for (const term of adjTerms) {
         const jobs = await fetchJSearch(term)
         for (const j of jobs) {
           allAdjacentJobs.push(normalizeJSearchJob(j as Record<string, unknown>, profileId, 'adjacent'))
+        }
+      }
+
+      if (allAdjacentJobs.length === 0) {
+        console.log('[submit-stage] Stage 6 JSearch fallback → Adzuna for adjacent')
+        for (const term of adjTerms.slice(0, 2)) {
+          const jobs = await fetchAdzuna(sanitizeForAdzuna6(term))
+          for (const j of jobs) {
+            allAdjacentJobs.push(normalizeAdzunaJob(j as Record<string, unknown>, profileId, 'adjacent'))
+          }
         }
       }
 
