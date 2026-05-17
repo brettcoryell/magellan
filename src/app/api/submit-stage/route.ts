@@ -69,7 +69,7 @@ Return JSON only:
 async function extractValues(valuesText: string) {
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
-    max_tokens: 768,
+    max_tokens: 1024,
     messages: [{
       role: 'user',
       content: `Extract values and culture signals from this job seeker's answer about a moment of work pride.
@@ -89,7 +89,10 @@ Return JSON only:
 
 work_style options: "autonomous" | "collaborative" | "unclear"
 motivation_type options: "outcome" | "process" | "people" | "unclear"
-values_signals: concrete values like ["craftsmanship", "collaboration", "impact", "autonomy", "mentorship"]`
+values_signals: concrete values like ["craftsmanship", "collaboration", "impact", "autonomy", "mentorship"]
+unstructured_notes: capture any meaningful detail that doesn't fit the structured fields above
+
+schema_fit_warning: set to true ONLY if the answer is genuinely off-topic, incoherent, or so abstract that no meaningful values can be extracted. A long, detailed, or personal answer is NOT a reason to set this — extract what you can and put overflow detail in unstructured_notes.`
     }]
   })
   const raw = (response.content[0] as { type: string; text: string }).text
@@ -100,7 +103,7 @@ values_signals: concrete values like ["craftsmanship", "collaboration", "impact"
 async function extractCapabilities(capText: string, profileJson: string) {
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
-    max_tokens: 768,
+    max_tokens: 1024,
     messages: [{
       role: 'user',
       content: `Given this job seeker's profile: ${profileJson}
@@ -120,7 +123,10 @@ Extract demonstrated capabilities. Return JSON only:
 
 demonstrated_capabilities: concrete skills/domains, e.g. ["distributed systems", "team leadership", "cost optimization"]
 problem_domain: primary domain the hardest problem was in
-differentiator: 1 sentence on what made them the right person`
+differentiator: 1 sentence on what made them the right person
+unstructured_notes: capture any meaningful detail that doesn't fit the structured fields above
+
+schema_fit_warning: set to true ONLY if the answer is genuinely off-topic, incoherent, or so abstract that no meaningful capabilities can be extracted. A long, detailed, or technical answer is NOT a reason to set this — extract what you can and put overflow detail in unstructured_notes.`
     }]
   })
   const raw = (response.content[0] as { type: string; text: string }).text

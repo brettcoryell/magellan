@@ -85,7 +85,7 @@ export default function StageProgress({
                     )}
                   </div>
                   {hasWarning && (
-                    <span title="Schema overflow detected — some details may be in notes" className="text-amber-400 text-sm ml-1 shrink-0">⚠</span>
+                    <span title="Some details from your answer are stored as notes — nothing was lost" className="text-slate-500 text-sm ml-1 shrink-0">·</span>
                   )}
                 </div>
               </div>
