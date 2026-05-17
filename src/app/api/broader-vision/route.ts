@@ -92,6 +92,23 @@ export async function GET(request: NextRequest) {
       })
     }
 
+    // Also try relaxing the seniority requirement — the seniority penalty has no confidence
+    // damping so it's invisible to the constraint checks above. This surfaces jobs that score
+    // well on everything except seniority level (e.g. a great Director role for a VP/CIO).
+    if (pref.seniority_level) {
+      const seniorityRelaxedProfile: Partial<PreferenceProfile> = { ...pref, seniority_level: undefined }
+      for (const job of jobs) {
+        if (!job.signals || Object.keys(job.signals).length === 0) continue
+        const before = scoreJob(job.signals as Partial<JobSignals>, pref).normalized
+        const after = scoreJob(job.signals as Partial<JobSignals>, seniorityRelaxedProfile).normalized
+        const delta = after - before
+        if (delta > (improvementByJob.get(job.id) ?? 0)) {
+          improvementByJob.set(job.id, delta)
+          relaxedConstraintByJob.set(job.id, 'seniority level')
+        }
+      }
+    }
+
     // Find jobs that jump a tier when any constraint is relaxed
     const relaxedJobs = jobs
       .filter(job => {

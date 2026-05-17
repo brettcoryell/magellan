@@ -6,6 +6,7 @@ import JobCard from './JobCard'
 interface JobsListProps {
   jobs: JobPosting[]
   stageCompleted: number
+  onIgnore?: (id: string) => void
 }
 
 const TIER_CONFIG = {
@@ -32,7 +33,7 @@ const TIER_CONFIG = {
   },
 } as const
 
-export default function JobsList({ jobs, stageCompleted }: JobsListProps) {
+export default function JobsList({ jobs, stageCompleted, onIgnore }: JobsListProps) {
   if (jobs.length === 0) {
     return (
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-12 text-center">
@@ -78,7 +79,12 @@ export default function JobsList({ jobs, stageCompleted }: JobsListProps) {
             {/* Job cards */}
             <div className="grid gap-3">
               {displayJobs.map(job => (
-                <JobCard key={job.id} job={job} stageCompleted={stageCompleted} />
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  stageCompleted={stageCompleted}
+                  onIgnore={onIgnore ? () => onIgnore(job.id) : undefined}
+                />
               ))}
             </div>
           </div>

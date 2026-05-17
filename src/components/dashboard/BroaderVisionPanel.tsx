@@ -13,6 +13,8 @@ interface BroaderVisionPanelProps {
   profileId: string
   active: boolean
   onAddToResults: (job: JobPosting) => void
+  ignoredIds?: Set<string>
+  onIgnore?: (id: string) => void
 }
 
 function formatSalary(min: number | null, max: number | null): string | null {
@@ -29,11 +31,13 @@ function BroaderJobCard({
   label,
   onAdd,
   added,
+  onIgnore,
 }: {
   job: RelaxedJob | JobPosting
   label?: string
   onAdd: () => void
   added: boolean
+  onIgnore?: () => void
 }) {
   const salary = formatSalary(job.salary_min, job.salary_max)
   return (
@@ -57,7 +61,7 @@ function BroaderJobCard({
       {job.fit_summary && (
         <p className="text-xs text-slate-400 italic">{job.fit_summary}</p>
       )}
-      <div className="flex items-center gap-2 pt-1">
+      <div className="flex items-center gap-2 pt-1 flex-wrap">
         <a
           href={job.url}
           target="_blank"
@@ -77,12 +81,20 @@ function BroaderJobCard({
         {added && (
           <span className="text-xs text-emerald-400">Added ✓</span>
         )}
+        {onIgnore && (
+          <button
+            onClick={onIgnore}
+            className="text-xs text-slate-600 hover:text-slate-400 transition-colors px-2 py-1 rounded hover:bg-slate-700/60 ml-auto"
+          >
+            Ignore
+          </button>
+        )}
       </div>
     </div>
   )
 }
 
-export default function BroaderVisionPanel({ profileId, active, onAddToResults }: BroaderVisionPanelProps) {
+export default function BroaderVisionPanel({ profileId, active, onAddToResults, ignoredIds, onIgnore }: BroaderVisionPanelProps) {
   const [relaxed, setRelaxed] = useState<RelaxedJob[]>([])
   const [adjacent, setAdjacent] = useState<JobPosting[]>([])
   const [loading, setLoading] = useState(false)
@@ -138,7 +150,9 @@ export default function BroaderVisionPanel({ profileId, active, onAddToResults }
     )
   }
 
-  const hasContent = relaxed.length > 0 || adjacent.length > 0
+  const visibleRelaxed = relaxed.filter(j => !ignoredIds?.has(j.id))
+  const visibleAdjacent = adjacent.filter(j => !ignoredIds?.has(j.id))
+  const hasContent = visibleRelaxed.length > 0 || visibleAdjacent.length > 0
 
   return (
     <div className="bg-slate-900 border border-slate-700 rounded-xl p-6">
@@ -158,17 +172,18 @@ export default function BroaderVisionPanel({ profileId, active, onAddToResults }
             <h4 className="text-xs font-semibold text-amber-400/80 uppercase tracking-wider mb-3">
               Jobs you almost ruled out
             </h4>
-            {relaxed.length === 0 ? (
+            {visibleRelaxed.length === 0 ? (
               <p className="text-xs text-slate-600">No tier-jumping jobs found when constraints are relaxed.</p>
             ) : (
               <div className="space-y-3">
-                {relaxed.map(job => (
+                {visibleRelaxed.map(job => (
                   <BroaderJobCard
                     key={job.id}
                     job={job}
                     label={`Would be ${job.relaxed_tier}`}
                     onAdd={() => handleAdd(job)}
                     added={addedIds.has(job.id)}
+                    onIgnore={onIgnore ? () => onIgnore(job.id) : undefined}
                   />
                 ))}
               </div>
@@ -180,16 +195,17 @@ export default function BroaderVisionPanel({ profileId, active, onAddToResults }
             <h4 className="text-xs font-semibold text-violet-400/80 uppercase tracking-wider mb-3">
               New opportunities
             </h4>
-            {adjacent.length === 0 ? (
+            {visibleAdjacent.length === 0 ? (
               <p className="text-xs text-slate-600">No adjacent role results found.</p>
             ) : (
               <div className="space-y-3">
-                {adjacent.map(job => (
+                {visibleAdjacent.map(job => (
                   <BroaderJobCard
                     key={job.id}
                     job={job}
                     onAdd={() => handleAdd(job)}
                     added={addedIds.has(job.id)}
+                    onIgnore={onIgnore ? () => onIgnore(job.id) : undefined}
                   />
                 ))}
               </div>

@@ -83,35 +83,17 @@ export default function AspirationForm({ profileId, onComplete, onLoadingChange 
           disabled={!isValid || loading}
           className={`w-full font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 text-sm flex items-center justify-center gap-2 ${
             loading
-              ? 'bg-slate-700 text-white cursor-not-allowed'
+              ? 'bg-amber-500/40 text-slate-950/60 cursor-not-allowed'
               : isValid
               ? 'bg-amber-500 hover:bg-amber-400 text-slate-950'
               : 'bg-slate-800 text-slate-600 cursor-not-allowed'
           }`}
         >
-          {loading ? (
-            <>
-              <svg className="animate-spin w-4 h-4 text-white" viewBox="0 0 24 24" fill="none">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
-              Searching job boards...
-            </>
-          ) : (
-            <>
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              Find Matching Jobs
-            </>
-          )}
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          Find Matching Jobs
         </button>
-
-        {loading && (
-          <p className="text-xs text-slate-400 text-center mt-2">
-            Searching Remotive and Adzuna — this takes a minute or two.
-          </p>
-        )}
       </form>
     </div>
   )

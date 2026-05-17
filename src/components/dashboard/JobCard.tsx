@@ -6,6 +6,7 @@ import { JobPosting } from '@/lib/types'
 interface JobCardProps {
   job: JobPosting
   stageCompleted: number
+  onIgnore?: () => void
 }
 
 const SOURCE_STYLES: Record<string, { label: string; bg: string; text: string }> = {
@@ -40,7 +41,7 @@ function ScoreBadge({ score, tier }: { score: number; tier: 'great' | 'good' | '
   )
 }
 
-export default function JobCard({ job, stageCompleted }: JobCardProps) {
+export default function JobCard({ job, stageCompleted, onIgnore }: JobCardProps) {
   const [expanded, setExpanded] = useState(false)
   const isUnlocked = stageCompleted >= 3
   const showScoreBadge = stageCompleted >= 4 && job.fit_score !== null && job.fit_tier !== null
@@ -73,7 +74,10 @@ export default function JobCard({ job, stageCompleted }: JobCardProps) {
       {/* Title */}
       <div className="mb-2">
         {!isUnlocked ? (
-          <div className="overflow-hidden rounded">
+          <div
+            className="overflow-hidden rounded cursor-help"
+            title="Tell us about your career aspirations to reveal job titles"
+          >
             <h3 className="text-base font-semibold text-slate-100 blur-xl select-none pointer-events-none">
               {job.title}
             </h3>
@@ -159,25 +163,36 @@ export default function JobCard({ job, stageCompleted }: JobCardProps) {
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center gap-3">
         {job.posted_at && (
           <span className="text-xs text-slate-600">
             {new Date(job.posted_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
           </span>
         )}
-        <a
-          href={isUnlocked ? job.url : undefined}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={e => !isUnlocked && e.preventDefault()}
-          className={`ml-auto text-xs font-medium px-3 py-1.5 rounded-lg border transition-all duration-200 ${
-            isUnlocked
-              ? 'border-amber-700/60 text-amber-400 hover:bg-amber-500 hover:border-amber-500 hover:text-slate-950'
-              : 'border-slate-700 text-slate-600 cursor-not-allowed'
-          }`}
-        >
-          View Job →
-        </a>
+        <div className="ml-auto flex items-center gap-2">
+          {onIgnore && (
+            <button
+              onClick={onIgnore}
+              className="text-xs text-slate-600 hover:text-slate-400 transition-colors px-2 py-1 rounded hover:bg-slate-800"
+            >
+              Ignore
+            </button>
+          )}
+          <a
+            href={isUnlocked ? job.url : undefined}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={e => !isUnlocked && e.preventDefault()}
+            title={!isUnlocked ? 'Tell us about your career aspirations to unlock job links' : undefined}
+            className={`text-xs font-medium px-3 py-1.5 rounded-lg border transition-all duration-200 ${
+              isUnlocked
+                ? 'border-amber-700/60 text-amber-400 hover:bg-amber-500 hover:border-amber-500 hover:text-slate-950'
+                : 'border-slate-700 text-slate-600 cursor-not-allowed'
+            }`}
+          >
+            View Job →
+          </a>
+        </div>
       </div>
     </div>
   )

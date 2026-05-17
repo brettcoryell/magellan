@@ -269,9 +269,9 @@ async function fetchAdzuna(query: string) {
   return results
 }
 
-async function fetchJSearch(query: string) {
+async function fetchJSearch(query: string): Promise<{ jobs: Record<string, unknown>[]; hadError: boolean }> {
   const apiKey = process.env.JSEARCH_API_KEY
-  if (!apiKey) return []
+  if (!apiKey) return { jobs: [], hadError: false }
   const url = `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(query)}&num_pages=1&page=1&results_per_page=25`
   const response = await fetch(url, {
     headers: {
@@ -280,11 +280,12 @@ async function fetchJSearch(query: string) {
     },
   })
   if (!response.ok) {
-    console.error('[submit-stage] JSearch error', response.status, await response.text())
-    return []
+    const errText = await response.text()
+    console.error('[submit-stage] JSearch error', response.status, errText.slice(0, 200))
+    return { jobs: [], hadError: true }
   }
   const data = await response.json()
-  return data.data || []
+  return { jobs: data.data || [], hadError: false }
 }
 
 // ── Job normalizers ──────────────────────────────────────────────────────────
@@ -604,9 +605,11 @@ export async function POST(request: NextRequest) {
       console.log('[submit-stage] Stage 4 JSearch queries:', jSearchQueries)
 
       const allRawJobs: Array<ReturnType<typeof normalizeJSearchJob> | ReturnType<typeof normalizeAdzunaJob>> = []
+      let jSearchHadError = false
       for (const q of jSearchQueries) {
-        const jobs = await fetchJSearch(q)
-        for (const j of jobs) allRawJobs.push(normalizeJSearchJob(j as Record<string, unknown>, profileId, 'main'))
+        const { jobs, hadError } = await fetchJSearch(q)
+        if (hadError) jSearchHadError = true
+        for (const j of jobs) allRawJobs.push(normalizeJSearchJob(j, profileId, 'main'))
       }
 
       // If JSearch returned nothing (subscription inactive or error), fall back to Adzuna
@@ -628,9 +631,14 @@ export async function POST(request: NextRequest) {
       await rescoreAllJobs(supabase, profileId, updatedPref, 4)
 
       const schemaWarning = !!valuesSignals.schema_fit_warning
+      const existingSourceErrors = ((profile.preference_profile as Record<string, unknown>)?.source_errors as Record<string, string> | undefined) || {}
+      const newSourceErrors: Record<string, string | null> = { ...existingSourceErrors }
+      if (jSearchHadError) newSourceErrors.jsearch = 'unavailable'
+      else delete newSourceErrors.jsearch
+
       const profileUpdate: Record<string, unknown> = {
         values_raw: answer,
-        preference_profile: updatedPref,
+        preference_profile: { ...updatedPref, source_errors: newSourceErrors },
         stage_completed: Math.max(profile.stage_completed, 4),
         updated_at: new Date().toISOString(),
       }
@@ -742,9 +750,9 @@ export async function POST(request: NextRequest) {
 
       const allAdjacentJobs: Array<ReturnType<typeof normalizeJSearchJob> | ReturnType<typeof normalizeAdzunaJob>> = []
       for (const term of adjTerms) {
-        const jobs = await fetchJSearch(term)
+        const { jobs } = await fetchJSearch(term)
         for (const j of jobs) {
-          allAdjacentJobs.push(normalizeJSearchJob(j as Record<string, unknown>, profileId, 'adjacent'))
+          allAdjacentJobs.push(normalizeJSearchJob(j, profileId, 'adjacent'))
         }
       }
 

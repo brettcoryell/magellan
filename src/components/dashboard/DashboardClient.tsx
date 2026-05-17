@@ -38,6 +38,7 @@ export default function DashboardClient({
   const [submittingStage, setSubmittingStage] = useState<number | null>(null)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [resetting, setResetting] = useState(false)
+  const [ignoredIds, setIgnoredIds] = useState<Set<string>>(new Set())
 
   const supabase = createClient()
 
@@ -94,14 +95,23 @@ export default function DashboardClient({
     }
   }
 
-  const handleAddToResults = useCallback((job: JobPosting) => {
+  const handleAddToResults = useCallback(async (job: JobPosting) => {
     setJobs(prev => {
-      if (prev.find(j => j.id === job.id)) return prev
-      return [{ ...job, source_type: 'main' }, ...prev]
+      // Skip if already in main results
+      if (prev.find(j => j.id === job.id && j.source_type === 'main')) return prev
+      // Promote adjacent/relaxed entry to main (remove old entry first to avoid duplicates)
+      return [{ ...job, source_type: 'main' }, ...prev.filter(j => j.id !== job.id)]
     })
+    // Persist the source_type change so it survives a page refresh
+    await supabase.from('job_postings').update({ source_type: 'main' }).eq('id', job.id)
+  }, [supabase])
+
+  const handleIgnore = useCallback((id: string) => {
+    setIgnoredIds(prev => { const s = new Set(prev); s.add(id); return s })
   }, [])
 
   const stageCompleted = profile?.stage_completed ?? 0
+  const sourceErrors = ((profile?.preference_profile as Record<string, unknown>)?.source_errors as Record<string, string> | undefined) || {}
   const profileId = profile?.id ?? null
 
   // Schema warning stages — any stage that had an overflow
@@ -274,6 +284,7 @@ export default function DashboardClient({
               stageCompleted={stageCompleted}
               loading={stageLoading !== null}
               submittingStage={submittingStage}
+              sourceErrors={sourceErrors}
             />
 
             {/* Broader Vision panel — at top of job section */}
@@ -282,6 +293,8 @@ export default function DashboardClient({
                 profileId={profileId}
                 active={stageCompleted >= 6}
                 onAddToResults={handleAddToResults}
+                ignoredIds={ignoredIds}
+                onIgnore={handleIgnore}
               />
             )}
 
@@ -301,8 +314,9 @@ export default function DashboardClient({
                 )}
               </div>
               <JobsList
-                jobs={jobs.filter(j => j.source_type === 'main')}
+                jobs={jobs.filter(j => j.source_type === 'main' && !ignoredIds.has(j.id))}
                 stageCompleted={stageCompleted}
+                onIgnore={handleIgnore}
               />
             </div>
           </div>

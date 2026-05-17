@@ -57,31 +57,16 @@ export default function ValuesForm({ profileId, onComplete, onLoadingChange }: V
       <button
         type="submit"
         disabled={loading || !isValid}
-        className={`w-full py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors ${
+        className={`w-full py-2 rounded-lg text-sm font-medium transition-colors ${
           loading
-            ? 'bg-slate-700 text-white cursor-not-allowed'
+            ? 'bg-amber-500/40 text-slate-950/60 cursor-not-allowed'
             : isValid
             ? 'bg-amber-500 text-slate-950 hover:bg-amber-400'
             : 'bg-slate-800 text-slate-600 cursor-not-allowed'
         }`}
       >
-        {loading ? (
-          <>
-            <svg className="animate-spin w-4 h-4 text-white" viewBox="0 0 24 24" fill="none">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-            </svg>
-            Searching for value-aligned jobs...
-          </>
-        ) : (
-          'Find Value-Aligned Jobs →'
-        )}
+        Find Value-Aligned Jobs →
       </button>
-      {loading && (
-        <p className="text-xs text-slate-400 text-center">
-          Extracting your values and searching job boards — this takes a couple of minutes.
-        </p>
-      )}
     </form>
   )
 }

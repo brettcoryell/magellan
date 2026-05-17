@@ -8,6 +8,7 @@ interface SourcesPanelProps {
   stageCompleted: number
   loading?: boolean
   submittingStage?: number | null
+  sourceErrors?: Record<string, string>
 }
 
 const SOURCE_CONFIG = [
@@ -46,7 +47,7 @@ const SOURCE_CONFIG = [
   },
 ]
 
-export default function SourcesPanel({ jobs, active, stageCompleted, loading, submittingStage }: SourcesPanelProps) {
+export default function SourcesPanel({ jobs, active, stageCompleted, loading, submittingStage, sourceErrors }: SourcesPanelProps) {
   return (
     <div className={`rounded-xl border p-5 transition-all duration-400 ${
       active
@@ -78,6 +79,7 @@ export default function SourcesPanel({ jobs, active, stageCompleted, loading, su
           const isActive = active && hasReached
           const hasJobs = count > 0
           const isRowLoading = submittingStage === src.loadingAtStage
+          const hasError = !!(sourceErrors?.[src.key])
 
           return (
             <div
@@ -119,6 +121,8 @@ export default function SourcesPanel({ jobs, active, stageCompleted, loading, su
                     </svg>
                     <span className="text-xs text-amber-400">Searching</span>
                   </div>
+                ) : hasError && isActive ? (
+                  <span className="font-mono text-xs font-bold text-red-400">Error</span>
                 ) : (
                   <span className={`font-mono text-sm font-bold ${
                     isActive && hasJobs ? src.color : 'text-slate-600'
