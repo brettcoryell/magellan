@@ -120,10 +120,16 @@ export default function DashboardClient({
   const handleAddToResults = useCallback(async (job: JobPosting) => {
     setJobs(prev => {
       if (prev.find(j => j.id === job.id && j.source_type === 'main')) return prev
-      return [{ ...job, source_type: 'main' }, ...prev.filter(j => j.id !== job.id)]
+      const updated = [{ ...job, source_type: 'main' as const }, ...prev.filter(j => j.id !== job.id)]
+      return updated.sort((a, b) => {
+        if (a.fit_score === null) return 1
+        if (b.fit_score === null) return -1
+        return b.fit_score - a.fit_score
+      })
     })
     await supabase.from('job_postings').update({ source_type: 'main' }).eq('id', job.id)
-  }, [supabase])
+    if (profileId) await refetchJobs(profileId)
+  }, [supabase, profileId, refetchJobs])
 
   const handleIgnore = useCallback(async (id: string) => {
     setJobs(prev => prev.map(j => j.id === id ? { ...j, ignored: true } : j))
