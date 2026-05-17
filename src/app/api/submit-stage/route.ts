@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
+
+export const maxDuration = 60
 import Anthropic from '@anthropic-ai/sdk'
 import { scoreJob, assignTier, makeDeduKey } from '@/lib/scoring'
 import { JobSignals, PreferenceProfile, SignalConfidence } from '@/lib/types'
@@ -307,7 +309,7 @@ function normalizeRemotiveJob(job: Record<string, unknown>, profileId: string) {
     salary_min: null,
     salary_max: null,
     posted_at: (job.publication_date as string) || null,
-    dedup_key: makeDeduKey(title, company, location),
+    dedup_key: `remotive-${String(job.id)}`,
     signals: {},
     fit_score: null,
     fit_tier: null,
@@ -333,7 +335,7 @@ function normalizeAdzunaJob(job: Record<string, unknown>, profileId: string, sou
     salary_min: job.salary_min ? Math.round(job.salary_min as number) : null,
     salary_max: job.salary_max ? Math.round(job.salary_max as number) : null,
     posted_at: (job.created as string) || null,
-    dedup_key: makeDeduKey(title, company, location),
+    dedup_key: `adzuna-${makeDeduKey(title, company, '')}`,
     signals: {},
     fit_score: null,
     fit_tier: null,
@@ -361,7 +363,7 @@ function normalizeJSearchJob(job: Record<string, unknown>, profileId: string, so
     salary_min: job.job_min_salary ? Math.round(job.job_min_salary as number) : null,
     salary_max: job.job_max_salary ? Math.round(job.job_max_salary as number) : null,
     posted_at: (job.job_posted_at_datetime_utc as string) || null,
-    dedup_key: makeDeduKey(title, company, location),
+    dedup_key: `jsearch-${String(job.job_id || '')}`,
     signals: {},
     fit_score: null,
     fit_tier: null,
