@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import AuthForm from '@/components/auth/AuthForm'
+import StatsRow from '@/components/landing/StatsRow'
 
 export default function LandingPage() {
   return (
@@ -38,29 +38,7 @@ export default function LandingPage() {
             ))}
           </ul>
 
-          <div className="mt-12 pt-8 border-t border-slate-800">
-            <div className="flex items-center gap-6">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-amber-400">3</div>
-                <div className="text-xs text-slate-500 mt-0.5">job sources</div>
-              </div>
-              <div className="w-px h-8 bg-slate-800" />
-              <div className="text-center">
-                <div className="text-2xl font-bold text-amber-400">AI</div>
-                <div className="text-xs text-slate-500 mt-0.5">fit scoring</div>
-              </div>
-              <div className="w-px h-8 bg-slate-800" />
-              <div className="text-center">
-                <div className="text-2xl font-bold text-amber-400">100%</div>
-                <div className="text-xs text-slate-500 mt-0.5">personalized</div>
-              </div>
-            </div>
-            <div className="mt-6">
-              <Link href="/about" className="text-xs text-slate-600 hover:text-slate-400 transition-colors">
-                About Career Explorer →
-              </Link>
-            </div>
-          </div>
+          <StatsRow />
         </div>
       </div>
 

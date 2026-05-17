@@ -142,33 +142,9 @@ export default function JobCard({ job, stageCompleted, onIgnore, onRestore }: Jo
   const sourceStyle = SOURCE_STYLES[job.source] || SOURCE_STYLES.remotive
   const salary = formatSalary(job.salary_min, job.salary_max)
 
-  if (job.ignored) {
-    return (
-      <div className="relative bg-slate-900/60 border border-slate-800/60 rounded-xl p-4 opacity-50">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${sourceStyle.bg} ${sourceStyle.text}`}>
-              {sourceStyle.label}
-            </span>
-            <span className="text-xs text-slate-600 border border-slate-700 rounded-full px-2 py-0.5">Ignored</span>
-          </div>
-          {onRestore && (
-            <button
-              onClick={() => onRestore(job.id)}
-              className="text-xs text-slate-500 hover:text-slate-300 transition-colors px-2 py-1 rounded hover:bg-slate-800"
-            >
-              Restore
-            </button>
-          )}
-        </div>
-        <p className="text-sm text-slate-600 mt-2">{isUnlocked ? job.title : '••••••••'}</p>
-        {job.company && <p className="text-xs text-slate-700 mt-0.5">{job.company}</p>}
-      </div>
-    )
-  }
 
   return (
-    <div className="relative bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-all duration-200 group">
+    <div className={`relative bg-slate-900 border border-slate-800 rounded-xl p-5 transition-all duration-200 group ${job.ignored ? 'opacity-75' : 'hover:border-slate-700'}`}>
       {showScoreBadge && (
         <ScoreBadge score={job.fit_score!} tier={job.fit_tier!} />
       )}
@@ -178,6 +154,11 @@ export default function JobCard({ job, stageCompleted, onIgnore, onRestore }: Jo
         <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${sourceStyle.bg} ${sourceStyle.text}`}>
           {sourceStyle.label}
         </span>
+        {job.ignored && (
+          <span className="text-xs text-slate-500 border border-slate-700 rounded-full px-2 py-0.5">
+            Ignored
+          </span>
+        )}
         {stageCompleted < 4 && job.fit_tier && (
           <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${
             job.fit_tier === 'great' ? 'bg-amber-950/60 border-amber-700/60 text-amber-400' :
@@ -288,13 +269,24 @@ export default function JobCard({ job, stageCompleted, onIgnore, onRestore }: Jo
           {stageCompleted >= 6 && (
             <AnalysisPanel jobId={job.id} profileId={job.profile_id} />
           )}
-          {onIgnore && (
-            <button
-              onClick={() => onIgnore(job.id)}
-              className="text-xs text-slate-600 hover:text-slate-400 transition-colors px-2 py-1 rounded hover:bg-slate-800"
-            >
-              Ignore
-            </button>
+          {job.ignored ? (
+            onRestore && (
+              <button
+                onClick={() => onRestore(job.id)}
+                className="text-xs text-slate-500 hover:text-slate-300 transition-colors px-2 py-1 rounded hover:bg-slate-800"
+              >
+                Restore
+              </button>
+            )
+          ) : (
+            onIgnore && (
+              <button
+                onClick={() => onIgnore(job.id)}
+                className="text-xs text-slate-600 hover:text-slate-400 transition-colors px-2 py-1 rounded hover:bg-slate-800"
+              >
+                Ignore
+              </button>
+            )
           )}
           <a
             href={isUnlocked ? job.url : undefined}
