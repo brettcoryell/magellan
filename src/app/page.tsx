@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import AuthForm from '@/components/auth/AuthForm'
 
 export default function LandingPage() {
@@ -53,6 +54,11 @@ export default function LandingPage() {
                 <div className="text-2xl font-bold text-amber-400">100%</div>
                 <div className="text-xs text-slate-500 mt-0.5">personalized</div>
               </div>
+            </div>
+            <div className="mt-6">
+              <Link href="/about" className="text-xs text-slate-600 hover:text-slate-400 transition-colors">
+                About Career Explorer →
+              </Link>
             </div>
           </div>
         </div>
