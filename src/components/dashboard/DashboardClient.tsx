@@ -33,7 +33,7 @@ function filterByFreshness(jobs: JobPosting[], filter: FreshnessFilter): JobPost
   const opt = FRESHNESS_OPTIONS.find(o => o.value === filter)!
   const cutoff = new Date(Date.now() - opt.days * 24 * 60 * 60 * 1000)
   return jobs.filter(j => {
-    if (!j.posted_at) return true
+    if (!j.posted_at) return false
     return new Date(j.posted_at) >= cutoff
   })
 }
