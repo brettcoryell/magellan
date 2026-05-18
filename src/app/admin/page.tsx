@@ -1,5 +1,6 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import ClearErrorsButton from './ClearErrorsButton'
 
 const GREAT_THRESHOLD = 0.72
 const GOOD_THRESHOLD = 0.50
@@ -158,17 +159,7 @@ export default async function AdminPage({
           <div>
             <div className="flex items-center justify-between mb-4">
               <span className="text-xs text-slate-500 font-mono">{errors.length} entries</span>
-              <form method="POST" action="/api/admin/errors">
-                <input type="hidden" name="_method" value="DELETE" />
-                <button
-                  formAction="/api/admin/errors"
-                  formMethod="DELETE"
-                  onClick={(e) => { if (!confirm('Clear all error log entries?')) e.preventDefault() }}
-                  className="text-xs text-red-500 hover:text-red-400 transition-colors border border-red-900/60 rounded-lg px-3 py-1.5"
-                >
-                  Clear all
-                </button>
-              </form>
+              <ClearErrorsButton />
             </div>
 
             <form className="flex gap-3 mb-6 flex-wrap">
