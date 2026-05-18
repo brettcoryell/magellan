@@ -21,7 +21,7 @@ export default async function AdminPage({
     .single()
   if (!adminProfile?.is_admin) redirect('/')
 
-  const tab = searchParams.tab === 'scoring' ? 'scoring' : 'errors'
+  const tab = searchParams.tab === 'errors' ? 'errors' : 'scoring'
 
   // ── Errors tab data ──────────────────────────────────────────────────────
   type ErrorRow = {
@@ -133,6 +133,16 @@ export default async function AdminPage({
         {/* Tabs */}
         <div className="flex gap-1 mb-6 bg-slate-900 border border-slate-800 rounded-xl p-1 w-fit">
           <a
+            href="/admin"
+            className={`text-xs font-medium px-4 py-2 rounded-lg transition-colors ${
+              tab === 'scoring'
+                ? 'bg-slate-800 text-slate-100'
+                : 'text-slate-500 hover:text-slate-300'
+            }`}
+          >
+            Scoring
+          </a>
+          <a
             href="/admin?tab=errors"
             className={`text-xs font-medium px-4 py-2 rounded-lg transition-colors ${
               tab === 'errors'
@@ -141,16 +151,6 @@ export default async function AdminPage({
             }`}
           >
             Errors
-          </a>
-          <a
-            href="/admin?tab=scoring"
-            className={`text-xs font-medium px-4 py-2 rounded-lg transition-colors ${
-              tab === 'scoring'
-                ? 'bg-slate-800 text-slate-100'
-                : 'text-slate-500 hover:text-slate-300'
-            }`}
-          >
-            Scoring
           </a>
         </div>
 
