@@ -56,6 +56,13 @@ export default async function DashboardPage() {
     }
   }
 
+  const { data: userProfile } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', user.id)
+    .single()
+  const isAdmin = userProfile?.is_admin ?? false
+
   const buildSha = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? 'dev'
 
   return (
@@ -64,6 +71,7 @@ export default async function DashboardPage() {
       initialJobs={jobs}
       userId={user.id}
       buildSha={buildSha}
+      isAdmin={isAdmin}
     />
   )
 }

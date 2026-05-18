@@ -221,7 +221,7 @@ export default function JobCard({ job, stageCompleted, onIgnore, onRestore }: Jo
         {job.posted_at && (
           <>
             <span className="text-slate-700">·</span>
-            <span className="text-slate-400 text-xs font-mono">
+            <span className="text-slate-400 text-xs">
               Posted: {new Date(job.posted_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </span>
           </>

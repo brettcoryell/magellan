@@ -19,11 +19,31 @@ import StarForm from './StarForm'
 import AdjacentForm from './AdjacentForm'
 import BroaderVisionPanel from './BroaderVisionPanel'
 
+type FreshnessFilter = 'all' | '7d' | '30d' | '60d'
+
+const FRESHNESS_OPTIONS: { value: FreshnessFilter; label: string; days: number }[] = [
+  { value: 'all', label: 'All jobs', days: 0 },
+  { value: '7d', label: 'Last 7 days', days: 7 },
+  { value: '30d', label: 'Last 30 days', days: 30 },
+  { value: '60d', label: 'Last 60 days', days: 60 },
+]
+
+function filterByFreshness(jobs: JobPosting[], filter: FreshnessFilter): JobPosting[] {
+  if (filter === 'all') return jobs
+  const opt = FRESHNESS_OPTIONS.find(o => o.value === filter)!
+  const cutoff = new Date(Date.now() - opt.days * 24 * 60 * 60 * 1000)
+  return jobs.filter(j => {
+    if (!j.posted_at) return true
+    return new Date(j.posted_at) >= cutoff
+  })
+}
+
 interface DashboardClientProps {
   initialProfile: CareerProfile | null
   initialJobs: JobPosting[]
   userId: string
   buildSha: string
+  isAdmin?: boolean
 }
 
 export default function DashboardClient({
@@ -31,6 +51,7 @@ export default function DashboardClient({
   initialJobs,
   userId,
   buildSha,
+  isAdmin = false,
 }: DashboardClientProps) {
   const router = useRouter()
   const [profile, setProfile] = useState<CareerProfile | null>(initialProfile)
@@ -41,6 +62,10 @@ export default function DashboardClient({
   const [resetting, setResetting] = useState(false)
   const [navigateConfirm, setNavigateConfirm] = useState<number | null>(null)
   const [navigating, setNavigating] = useState(false)
+  const [showRefreshConfirm, setShowRefreshConfirm] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
+  const [refreshedAtStage7, setRefreshedAtStage7] = useState(false)
+  const [freshnessFilter, setFreshnessFilter] = useState<FreshnessFilter>('all')
 
   const supabase = createClient()
   const profileId = profile?.id ?? null
@@ -118,6 +143,26 @@ export default function DashboardClient({
     }
   }
 
+  const handleRefresh = async () => {
+    if (!profileId) return
+    setShowRefreshConfirm(false)
+    setRefreshing(true)
+    try {
+      const res = await fetch('/api/refresh-jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profileId }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setJobs(data.jobs || [])
+        if (stageCompleted >= 7) setRefreshedAtStage7(true)
+      }
+    } finally {
+      setRefreshing(false)
+    }
+  }
+
   const handleAddToResults = useCallback(async (job: JobPosting) => {
     setJobs(prev => {
       if (prev.find(j => j.id === job.id && j.source_type === 'main')) return prev
@@ -171,9 +216,39 @@ export default function DashboardClient({
 
   const activeJobs = jobs.filter(j => j.source_type === 'main' && !j.ignored)
   const ignoredJobs = jobs.filter(j => j.source_type === 'main' && j.ignored)
+  const displayedActiveJobs = filterByFreshness(activeJobs, freshnessFilter)
+  const totalActiveCount = activeJobs.length
+  const filteredCount = displayedActiveJobs.length
 
   return (
     <div className="min-h-screen bg-slate-950">
+      {/* Refresh confirm modal */}
+      {showRefreshConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-sm mx-4 space-y-4">
+            <h3 className="text-slate-100 font-semibold text-sm">Refresh job results?</h3>
+            <p className="text-slate-400 text-xs leading-relaxed">
+              This will replace your current job results with fresh search results.
+              Your profile answers and scores will be preserved.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowRefreshConfirm(false)}
+                className="flex-1 text-xs py-2 rounded-lg border border-slate-700 text-slate-400 hover:text-slate-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRefresh}
+                className="flex-1 text-xs py-2 rounded-lg bg-amber-500 text-slate-950 font-medium hover:bg-amber-400 transition-colors"
+              >
+                Refresh
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Back-navigation confirm modal */}
       {navigateConfirm !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
@@ -219,6 +294,14 @@ export default function DashboardClient({
                   <span className="text-amber-400 font-semibold text-sm tracking-tight">Career Explorer</span>
                 </a>
                 <div className="flex items-center gap-3">
+                  {isAdmin && (
+                    <a
+                      href="/admin"
+                      className="text-slate-600 hover:text-slate-400 text-xs transition-colors"
+                    >
+                      Admin
+                    </a>
+                  )}
                   {profile && !showResetConfirm && (
                     <button
                       onClick={() => setShowResetConfirm(true)}
@@ -354,7 +437,7 @@ export default function DashboardClient({
                   active={jobs.length > 0}
                 />
                 <TierCountsPanel
-                  jobs={jobs}
+                  jobs={displayedActiveJobs}
                   active={stageCompleted >= 4}
                 />
               </div>
@@ -387,17 +470,66 @@ export default function DashboardClient({
                 <h2 className="text-lg font-semibold text-slate-100">
                   {stageCompleted >= 2 ? 'Your Job Matches' : 'Job Postings'}
                 </h2>
-                {stageCompleted < 3 && jobs.length > 0 && (
-                  <div className="flex items-center gap-1.5 text-xs text-slate-500 bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5">
-                    <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                    </svg>
-                    Titles unlock after stage 3
-                  </div>
-                )}
+                <div className="flex items-center gap-3">
+                  {stageCompleted < 3 && jobs.length > 0 && (
+                    <div className="flex items-center gap-1.5 text-xs text-slate-500 bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5">
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                      </svg>
+                      Titles unlock after stage 3
+                    </div>
+                  )}
+                  {stageCompleted >= 2 && (
+                    <button
+                      onClick={() => setShowRefreshConfirm(true)}
+                      disabled={refreshing}
+                      className="text-xs text-slate-500 hover:text-slate-300 transition-colors border border-slate-800 rounded-lg px-3 py-1.5 flex items-center gap-1.5 disabled:opacity-40"
+                    >
+                      <svg className={`w-3 h-3 ${refreshing ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      {refreshing ? 'Refreshing…' : 'Refresh Jobs'}
+                    </button>
+                  )}
+                </div>
               </div>
+
+              {/* Broader Vision stale notice */}
+              {refreshedAtStage7 && (
+                <div className="mb-4 text-xs text-amber-400/80 bg-amber-950/20 border border-amber-800/30 rounded-lg px-4 py-2.5">
+                  Broader Vision results are from your previous session. Re-complete Stage 7 to refresh them.
+                </div>
+              )}
+
+              {/* Refresh loading bar */}
+              {refreshing && (
+                <div className="mb-4 h-1 bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-amber-500 animate-pulse w-full" />
+                </div>
+              )}
+
+              {/* Freshness filter + job count */}
+              {stageCompleted >= 2 && activeJobs.length > 0 && (
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs text-slate-600">
+                    {freshnessFilter === 'all'
+                      ? `${totalActiveCount} ${totalActiveCount === 1 ? 'job' : 'jobs'}`
+                      : `Showing ${filteredCount} of ${totalActiveCount} jobs`}
+                  </span>
+                  <select
+                    value={freshnessFilter}
+                    onChange={e => setFreshnessFilter(e.target.value as FreshnessFilter)}
+                    className="text-xs bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-slate-400 focus:outline-none focus:border-amber-500/60 cursor-pointer"
+                  >
+                    {FRESHNESS_OPTIONS.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <JobsList
-                jobs={activeJobs}
+                jobs={displayedActiveJobs}
                 ignoredJobs={ignoredJobs}
                 stageCompleted={stageCompleted}
                 onIgnore={handleIgnore}
