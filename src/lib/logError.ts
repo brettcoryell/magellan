@@ -11,7 +11,7 @@ interface ErrorLogEntry {
 
 export async function logError(entry: ErrorLogEntry): Promise<void> {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createServiceClient()
     await supabase.from('error_log').insert({
       profile_id: entry.profile_id ?? null,
       stage: entry.stage ?? null,

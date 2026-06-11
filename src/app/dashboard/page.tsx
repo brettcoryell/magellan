@@ -4,7 +4,7 @@ import DashboardClient from '@/components/dashboard/DashboardClient'
 import { CareerProfile, JobPosting } from '@/lib/types'
 
 export default async function DashboardPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   // Get authenticated user
   const { data: { user } } = await supabase.auth.getUser()

@@ -10,7 +10,7 @@ export default async function AdminPage({
 }: {
   searchParams: { tab?: string; stage?: string; source?: string; since?: string }
 }) {
-  const supabase = createServiceClient()
+  const supabase = await createServiceClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
 

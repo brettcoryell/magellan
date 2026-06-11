@@ -4,7 +4,7 @@ import { makeDeduKey, scoreJob, assignTier } from './scoring'
 import { JobSignals, PreferenceProfile, SignalConfidence } from './types'
 import type { createServiceClient } from './supabase/server'
 
-type SupabaseClient = ReturnType<typeof createServiceClient>
+type SupabaseClient = Awaited<ReturnType<typeof createServiceClient>>
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
