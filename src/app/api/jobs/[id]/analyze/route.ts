@@ -25,9 +25,10 @@ function formatConstraints(profile: Partial<PreferenceProfile>): string {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const supabase = await createServiceClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -36,7 +37,7 @@ export async function POST(
     if (!profileId) return NextResponse.json({ error: 'Missing profileId' }, { status: 400 })
 
     const [{ data: job }, { data: profile }] = await Promise.all([
-      supabase.from('job_postings').select('*').eq('id', params.id).single(),
+      supabase.from('job_postings').select('*').eq('id', id).single(),
       supabase.from('career_profiles').select('*').eq('id', profileId).eq('user_id', user.id).single(),
     ])
 
@@ -102,7 +103,7 @@ Write as if you are a trusted advisor who will be held accountable for this advi
       fit_analysis: analysis,
       fit_analysis_profile_hash: currentHash,
       fit_analysis_generated_at: new Date().toISOString(),
-    }).eq('id', params.id)
+    }).eq('id', id)
 
     return NextResponse.json({ analysis, cached: false })
   } catch (err) {

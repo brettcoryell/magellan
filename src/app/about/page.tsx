@@ -2,21 +2,20 @@ import Link from 'next/link'
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-slate-950">
-      {/* Nav */}
-      <header className="border-b border-slate-800">
+    <div className="min-h-screen bg-[var(--mag-bg)]">
+      <header className="border-b border-[var(--mag-border)]">
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="w-7 h-7 bg-amber-500 rounded-lg flex items-center justify-center">
-              <svg className="w-4 h-4 text-slate-950" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <div className="w-7 h-7 bg-[var(--mag-accent)] rounded-lg flex items-center justify-center">
+              <svg className="w-4 h-4 text-[var(--mag-accent-contrast)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
               </svg>
             </div>
-            <span className="text-amber-400 font-semibold text-sm tracking-tight">Career Explorer</span>
+            <span className="text-[var(--mag-accent)] font-semibold text-sm tracking-tight">Magellan</span>
           </Link>
           <Link
             href="/"
-            className="text-xs text-slate-500 hover:text-slate-300 transition-colors border border-slate-700 rounded-lg px-3 py-1.5"
+            className="text-xs text-[var(--mag-text-muted)] hover:text-[var(--mag-text)] transition-colors border border-[var(--mag-border)] rounded-lg px-3 py-1.5"
           >
             Sign in →
           </Link>
@@ -26,10 +25,10 @@ export default function AboutPage() {
       <main className="max-w-3xl mx-auto px-6 py-16">
         {/* Hero */}
         <div className="mb-16">
-          <h1 className="text-3xl font-bold text-slate-100 leading-tight mb-6">
-            About Career Explorer
+          <h1 className="text-3xl font-bold text-[var(--mag-text)] leading-tight mb-6">
+            About Magellan
           </h1>
-          <div className="space-y-4 text-slate-300 leading-relaxed">
+          <div className="space-y-4 text-[var(--mag-text-soft)] leading-relaxed">
             <p>
               Finding your next job is hard. Knowing what to look for is harder.
             </p>
@@ -40,7 +39,7 @@ export default function AboutPage() {
               you&apos;re good at, but you&apos;ve never thought to search for them?
             </p>
             <p>
-              Career Explorer was built for that moment of uncertainty. It&apos;s not a replacement
+              Magellan was built for that moment of uncertainty. It&apos;s not a replacement
               for LinkedIn or Indeed. It&apos;s a place to think before you search.
             </p>
           </div>
@@ -48,10 +47,10 @@ export default function AboutPage() {
 
         {/* How It Works */}
         <section className="mb-16">
-          <h2 className="text-xl font-bold text-slate-100 mb-6">How It Works</h2>
-          <div className="space-y-4 text-slate-300 leading-relaxed">
+          <h2 className="text-xl font-bold text-[var(--mag-text)] mb-6">How It Works</h2>
+          <div className="space-y-4 text-[var(--mag-text-soft)] leading-relaxed">
             <p>
-              Career Explorer asks you a short series of questions — not a lengthy form, but a real
+              Magellan asks you a short series of questions — not a lengthy form, but a real
               conversation about your work. What you&apos;ve accomplished. What matters to you. What
               you won&apos;t do. What you&apos;re proud of but haven&apos;t found the right words for yet.
             </p>
@@ -70,14 +69,14 @@ export default function AboutPage() {
 
         {/* What Makes It Different */}
         <section className="mb-16">
-          <h2 className="text-xl font-bold text-slate-100 mb-8">What Makes It Different</h2>
+          <h2 className="text-xl font-bold text-[var(--mag-text)] mb-8">What Makes It Different</h2>
           <div className="space-y-8">
-            <div className="border-l-2 border-amber-500/40 pl-6">
-              <h3 className="text-base font-semibold text-slate-100 mb-3">
+            <div className="border-l-2 border-[var(--mag-accent)] pl-6">
+              <h3 className="text-base font-semibold text-[var(--mag-text)] mb-3">
                 We ask questions based on research, not guesswork.
               </h3>
-              <p className="text-slate-400 leading-relaxed text-sm">
-                The questions in Career Explorer are grounded in what organizational psychologists
+              <p className="text-[var(--mag-text-soft)] leading-relaxed text-sm">
+                The questions in Magellan are grounded in what organizational psychologists
                 and career researchers have found actually predicts job satisfaction and performance.
                 We ask about the work you&apos;re proudest of — not because it sounds nice, but because
                 the way you answer reveals your values more honestly than any checklist. We ask about
@@ -85,23 +84,23 @@ export default function AboutPage() {
                 predictor of fit than a list of skills on a page.
               </p>
             </div>
-            <div className="border-l-2 border-amber-500/40 pl-6">
-              <h3 className="text-base font-semibold text-slate-100 mb-3">
+            <div className="border-l-2 border-[var(--mag-accent)] pl-6">
+              <h3 className="text-base font-semibold text-[var(--mag-text)] mb-3">
                 We score honestly.
               </h3>
-              <p className="text-slate-400 leading-relaxed text-sm">
+              <p className="text-[var(--mag-text-soft)] leading-relaxed text-sm">
                 Every job in your results gets a fit score based on how well it matches your profile
                 — your constraints, your aspirations, your values, and your strengths. But we also
                 tell you where you don&apos;t fit. A job with three strong matches and one deal-breaker
                 will show you both. We think you deserve the full picture.
               </p>
             </div>
-            <div className="border-l-2 border-amber-500/40 pl-6">
-              <h3 className="text-base font-semibold text-slate-100 mb-3">
+            <div className="border-l-2 border-[var(--mag-accent)] pl-6">
+              <h3 className="text-base font-semibold text-[var(--mag-text)] mb-3">
                 We show you jobs you might not have considered.
               </h3>
-              <p className="text-slate-400 leading-relaxed text-sm">
-                After you&apos;ve built your profile, Career Explorer looks beyond the obvious results.
+              <p className="text-[var(--mag-text-soft)] leading-relaxed text-sm">
+                After you&apos;ve built your profile, Magellan looks beyond the obvious results.
                 It finds roles that match almost everything you said — except one thing you ruled out.
                 It surfaces adjacent titles that people with your background have moved into
                 successfully. It asks whether those boundaries are firm or flexible. Sometimes the
@@ -113,10 +112,10 @@ export default function AboutPage() {
 
         {/* What This Site Is Not */}
         <section className="mb-16">
-          <h2 className="text-xl font-bold text-slate-100 mb-6">What This Site Is Not</h2>
-          <div className="space-y-4 text-slate-300 leading-relaxed">
+          <h2 className="text-xl font-bold text-[var(--mag-text)] mb-6">What This Site Is Not</h2>
+          <div className="space-y-4 text-[var(--mag-text-soft)] leading-relaxed">
             <p>
-              Career Explorer is not an application tool. It won&apos;t submit your resume or message
+              Magellan is not an application tool. It won&apos;t submit your resume or message
               recruiters on your behalf. It&apos;s designed to help you arrive at other job sites —
               LinkedIn, Indeed, your industry&apos;s niche boards — with a clearer sense of what
               you&apos;re looking for and a broader sense of what&apos;s out there.
@@ -130,25 +129,25 @@ export default function AboutPage() {
 
         {/* Data note */}
         <section className="mb-16">
-          <h2 className="text-xl font-bold text-slate-100 mb-6">A Note on Your Data</h2>
-          <div className="text-slate-300 leading-relaxed">
+          <h2 className="text-xl font-bold text-[var(--mag-text)] mb-6">A Note on Your Data</h2>
+          <div className="text-[var(--mag-text-soft)] leading-relaxed">
             <p>
               Your answers, your resume, and your results are stored in your account and used only
-              to power your experience in Career Explorer. We don&apos;t sell your data, share it with
+              to power your experience in Magellan. We don&apos;t sell your data, share it with
               employers, or use it for advertising. When you&apos;re done, your data stays yours.
             </p>
           </div>
         </section>
 
         {/* Closing */}
-        <div className="border-t border-slate-800 pt-10">
-          <p className="text-slate-400 leading-relaxed italic">
-            Career Explorer was built with care for people who are ready to move but aren&apos;t sure where.
+        <div className="border-t border-[var(--mag-border)] pt-10">
+          <p className="text-[var(--mag-text-soft)] leading-relaxed italic">
+            Magellan was built with care for people who are ready to move but aren&apos;t sure where.
           </p>
           <div className="mt-8">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 bg-amber-500 text-slate-950 font-semibold text-sm px-5 py-2.5 rounded-lg hover:bg-amber-400 transition-colors"
+              className="inline-flex items-center gap-2 bg-[var(--mag-accent)] text-[var(--mag-accent-contrast)] font-semibold text-sm px-5 py-2.5 rounded-lg hover:bg-[var(--mag-accent-strong)] transition-colors"
             >
               Get started →
             </Link>
