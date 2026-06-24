@@ -1,4 +1,4 @@
-# Architecture Decisions — career-explorer
+# Architecture Decisions — magellan
 
 A Next.js web app that matches job seekers with tailored job postings via a structured 7-stage interview process. Built for individual job seekers. Stack: Next.js 14, TypeScript, TailwindCSS, Supabase, Anthropic Claude Sonnet.
 

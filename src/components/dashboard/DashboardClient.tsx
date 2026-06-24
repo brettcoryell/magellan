@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { CareerProfile, JobPosting } from '@/lib/types'
 import { createClient } from '@/lib/supabase/client'
@@ -221,7 +222,7 @@ export default function DashboardClient({
   const filteredCount = displayedActiveJobs.length
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-[var(--mag-bg)]">
       {/* Refresh confirm modal */}
       {showRefreshConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
@@ -285,14 +286,14 @@ export default function DashboardClient({
             {/* Logo + sign out + reset */}
             <div className="mb-6">
               <div className="flex items-center justify-between">
-                <a href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                  <div className="w-7 h-7 bg-amber-500 rounded-lg flex items-center justify-center">
-                    <svg className="w-4 h-4 text-slate-950" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                  <div className="w-7 h-7 bg-[var(--mag-accent)] rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-[var(--mag-accent-contrast)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                     </svg>
                   </div>
-                  <span className="text-amber-400 font-semibold text-sm tracking-tight">Career Explorer</span>
-                </a>
+                  <span className="text-[var(--mag-accent)] font-semibold text-sm tracking-tight">Magellan</span>
+                </Link>
                 <div className="flex items-center gap-3">
                   {isAdmin && (
                     <a

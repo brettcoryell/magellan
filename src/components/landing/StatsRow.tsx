@@ -41,7 +41,7 @@ export default function StatsRow() {
       <div className="mb-6">
         <Link
           href="/about"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-400 hover:text-amber-400 border border-slate-700 hover:border-amber-700/60 rounded-lg px-4 py-2 transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--mag-text-soft)] hover:text-[var(--mag-accent)] border border-[var(--mag-border)] hover:border-[var(--mag-border-strong)] rounded-lg px-4 py-2 transition-colors"
         >
           Learn More
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -52,20 +52,20 @@ export default function StatsRow() {
 
       <div className="flex items-center gap-6">
         <div className="text-center">
-          <div className="text-2xl font-bold text-amber-400 tabular-nums">{count3}</div>
-          <div className="text-xs text-slate-500 mt-0.5">job sources</div>
+          <div className="text-2xl font-bold text-[var(--mag-accent)] tabular-nums">{count3}</div>
+          <div className="text-xs text-[var(--mag-text-muted)] mt-0.5">job sources</div>
         </div>
-        <div className="w-px h-8 bg-slate-800" />
+        <div className="w-px h-8 bg-[var(--mag-border)]" />
         <div className="text-center">
-          <div className={`text-2xl font-bold text-amber-400 transition-opacity duration-500 ${aiVisible ? 'opacity-100' : 'opacity-0'}`}>
+          <div className={`text-2xl font-bold text-[var(--mag-accent)] transition-opacity duration-500 ${aiVisible ? 'opacity-100' : 'opacity-0'}`}>
             AI
           </div>
-          <div className="text-xs text-slate-500 mt-0.5">fit scoring</div>
+          <div className="text-xs text-[var(--mag-text-muted)] mt-0.5">fit scoring</div>
         </div>
-        <div className="w-px h-8 bg-slate-800" />
+        <div className="w-px h-8 bg-[var(--mag-border)]" />
         <div className="text-center">
-          <div className="text-2xl font-bold text-amber-400 tabular-nums">{count100}%</div>
-          <div className="text-xs text-slate-500 mt-0.5">personalized</div>
+          <div className="text-2xl font-bold text-[var(--mag-accent)] tabular-nums">{count100}%</div>
+          <div className="text-xs text-[var(--mag-text-muted)] mt-0.5">personalized</div>
         </div>
       </div>
     </div>

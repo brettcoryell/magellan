@@ -51,18 +51,17 @@ export default function AuthForm() {
   }
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl">
-      <h2 className="text-2xl font-bold text-slate-100 mb-1">
+    <div className="bg-[var(--mag-surface)] border border-[var(--mag-border)] rounded-lg p-8 shadow-2xl">
+      <h2 className="text-2xl font-bold text-[var(--mag-text)] mb-1">
         {tab === 'login' ? 'Welcome back' : 'Create account'}
       </h2>
-      <p className="text-slate-400 text-sm mb-6">
+      <p className="text-[var(--mag-text-soft)] text-sm mb-6">
         {tab === 'login'
           ? 'Sign in to continue to your dashboard.'
-          : 'Get started with job discovery.'}
+          : 'Start navigating better-fit roles.'}
       </p>
 
-      {/* Tabs */}
-      <div className="flex bg-slate-950 rounded-lg p-1 mb-6 border border-slate-800">
+      <div className="flex bg-[var(--mag-bg)] rounded-lg p-1 mb-6 border border-[var(--mag-border)]">
         {(['login', 'register'] as Tab[]).map(t => (
           <button
             key={t}
@@ -73,8 +72,8 @@ export default function AuthForm() {
             }}
             className={`flex-1 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
               tab === t
-                ? 'bg-amber-500 text-slate-950 shadow'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-[var(--mag-accent)] text-[var(--mag-accent-contrast)] shadow'
+                : 'text-[var(--mag-text-soft)] hover:text-[var(--mag-text)]'
             }`}
           >
             {t === 'login' ? 'Sign In' : 'Register'}
@@ -84,7 +83,7 @@ export default function AuthForm() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-1.5">
+          <label htmlFor="email" className="block text-sm font-medium text-[var(--mag-text-soft)] mb-1.5">
             Email address
           </label>
           <input
@@ -94,12 +93,12 @@ export default function AuthForm() {
             onChange={e => setEmail(e.target.value)}
             required
             placeholder="you@example.com"
-            className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all text-sm"
+            className="w-full bg-[var(--mag-bg)] border border-[var(--mag-border-strong)] rounded-lg px-4 py-2.5 text-[var(--mag-text)] placeholder:text-[var(--mag-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-accent)] focus:border-transparent transition-all text-sm"
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-slate-300 mb-1.5">
+          <label htmlFor="password" className="block text-sm font-medium text-[var(--mag-text-soft)] mb-1.5">
             Password
           </label>
           <input
@@ -110,7 +109,7 @@ export default function AuthForm() {
             required
             placeholder={tab === 'register' ? 'Min. 8 characters' : '••••••••'}
             minLength={tab === 'register' ? 8 : undefined}
-            className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all text-sm"
+            className="w-full bg-[var(--mag-bg)] border border-[var(--mag-border-strong)] rounded-lg px-4 py-2.5 text-[var(--mag-text)] placeholder:text-[var(--mag-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--mag-accent)] focus:border-transparent transition-all text-sm"
           />
         </div>
 
@@ -129,7 +128,7 @@ export default function AuthForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-amber-500 hover:bg-amber-400 disabled:bg-amber-500/50 text-slate-950 font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 text-sm flex items-center justify-center gap-2"
+          className="w-full bg-[var(--mag-accent)] hover:bg-[var(--mag-accent-strong)] disabled:opacity-50 text-[var(--mag-accent-contrast)] font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 text-sm flex items-center justify-center gap-2"
         >
           {loading ? (
             <>
@@ -145,7 +144,7 @@ export default function AuthForm() {
         </button>
       </form>
 
-      <p className="text-center text-slate-600 text-xs mt-6">
+      <p className="text-center text-[var(--mag-text-muted)] text-xs mt-6">
         By continuing, you agree to our terms of service.
       </p>
     </div>
