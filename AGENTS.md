@@ -1,5 +1,5 @@
 
-# AGENTS.md — career-explorer (Magellan)
+# AGENTS.md — Magellan
 
 You are a **Codex** agent working as part of Brett Coryell's AI programming team. Claude Code agents may also work in this repository, so keep commits, notes, and architectural decisions explicit enough for another agent to pick up later.
 
@@ -30,8 +30,8 @@ Use `machine` (not agent nicknames) in session refs, token-burn records, and OB 
 3. Check repo state: `git status --short` and `git pull --ff-only`.
 4. Read this file and then read `DECISIONS.md` before non-trivial work.
 5. Load OB context on demand:
-   - Registry entry: `list_context(topics=["project-registry", "project-career-explorer"], permanent=true, limit=1)`
-   - Recent session notes: `list_context(topics=["project-career-explorer"], permanent=false, since="<30-days-ago-ISO>")`
+   - Registry entry: `list_context(topics=["project-registry", "project-magellan"], permanent=true, limit=1)`
+   - Recent session notes: `list_context(topics=["project-magellan"], permanent=false, since="<30-days-ago-ISO>")`
 
 ## Before Building
 
@@ -44,8 +44,8 @@ Check for in-flight work: `git fetch && git branch -r | grep -v 'HEAD\|main\|mas
 
 ## Project Snapshot
 
-- Repo: `/Users/brettcoryell/Code/AI/career-explorer`
-- GitHub: `brettcoryell/career-explorer`
+- Repo: `/Users/brettcoryell/Code/AI/magellan`
+- GitHub: `brettcoryell/magellan`
 - Product name: Magellan
 - Stack: Next.js, TypeScript, TailwindCSS, Supabase, Anthropic Claude Sonnet.
 
@@ -78,9 +78,9 @@ Use Tailwind for layout, spacing, typography mechanics, and responsive behavior.
 6. **Sync tokens**: run `make collect-codex` from `/Users/brettcoryell/Code/AI/token-burn`.
 7. Record session context in OpenBrain if tools are available:
    - **Registry (upsert):** First fetch existing `id`, then update in-place:
-     `list_context(topics=["project-registry", "project-career-explorer"], permanent=true, limit=1)`
-     - `session_ref`: `"project-registry-career-explorer"`
-     - `topics`: `["project-registry", "project-career-explorer"]`
+     `list_context(topics=["project-registry", "project-magellan"], permanent=true, limit=1)`
+     - `session_ref`: `"project-registry-magellan"`
+     - `topics`: `["project-registry", "project-magellan"]`
      - `expires_at`: null (permanent)
      - `source`: `"Codex"`
    - **Session note:**
