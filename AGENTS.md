@@ -54,7 +54,7 @@ Check for in-flight work: `git fetch && git branch -r | grep -v 'HEAD\|main\|mas
 - Preserve the seven-stage preference pipeline from `DECISIONS.md`: Resume → Constraints → Aspiration → Values → Capabilities → STAR story → Adjacent interests.
 - Keep job scoring as Claude signal extraction plus deterministic scoring. Do not ask Claude to produce final fit scores directly.
 - Preserve confidence damping for uncertain preference answers.
-- Keep multi-source job fetching deduplicated by `(title, company, location)`.
+- Preserve source-aware job deduplication: source IDs for Remotive/JSearch and normalized `(title, company)` for Adzuna's multi-city duplicates.
 - Do not weaken Supabase RLS or service-role boundaries.
 - Persist extraction, job fetch, and scoring errors to `error_log`.
 

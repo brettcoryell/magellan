@@ -59,8 +59,6 @@ export default function DashboardClient({
   const [jobs, setJobs] = useState<JobPosting[]>(initialJobs)
   const [stageLoading, setStageLoading] = useState<number | null>(null)
   const [submittingStage, setSubmittingStage] = useState<number | null>(null)
-  const [showResetConfirm, setShowResetConfirm] = useState(false)
-  const [resetting, setResetting] = useState(false)
   const [navigateConfirm, setNavigateConfirm] = useState<number | null>(null)
   const [navigating, setNavigating] = useState(false)
   const [showRefreshConfirm, setShowRefreshConfirm] = useState(false)
@@ -108,20 +106,6 @@ export default function DashboardClient({
   const handleSignOut = async () => {
     await supabase.auth.signOut()
     router.push('/')
-  }
-
-  const handleReset = async () => {
-    setResetting(true)
-    try {
-      const res = await fetch('/api/reset', { method: 'POST' })
-      if (res.ok) {
-        setProfile(null)
-        setJobs([])
-        setShowResetConfirm(false)
-      }
-    } finally {
-      setResetting(false)
-    }
   }
 
   const handleNavigateToStage = async (stage: number) => {
@@ -180,21 +164,31 @@ export default function DashboardClient({
 
   const handleIgnore = useCallback(async (id: string) => {
     setJobs(prev => prev.map(j => j.id === id ? { ...j, ignored: true } : j))
-    await fetch(`/api/jobs/${id}/ignore`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ignored: true }),
-    })
-  }, [])
+    try {
+      const response = await fetch(`/api/jobs/${id}/ignore`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ignored: true, profileId }),
+      })
+      if (!response.ok) throw new Error('Could not ignore this job')
+    } catch {
+      setJobs(prev => prev.map(j => j.id === id ? { ...j, ignored: false } : j))
+    }
+  }, [profileId])
 
   const handleRestore = useCallback(async (id: string) => {
     setJobs(prev => prev.map(j => j.id === id ? { ...j, ignored: false } : j))
-    await fetch(`/api/jobs/${id}/ignore`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ignored: false }),
-    })
-  }, [])
+    try {
+      const response = await fetch(`/api/jobs/${id}/ignore`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ignored: false, profileId }),
+      })
+      if (!response.ok) throw new Error('Could not restore this job')
+    } catch {
+      setJobs(prev => prev.map(j => j.id === id ? { ...j, ignored: true } : j))
+    }
+  }, [profileId])
 
   const stageCompleted = profile?.stage_completed ?? 0
   const sourceErrors = ((profile?.preference_profile as Record<string, unknown>)?.source_errors as Record<string, string> | undefined) || {}
@@ -303,14 +297,6 @@ export default function DashboardClient({
                       Admin
                     </a>
                   )}
-                  {profile && !showResetConfirm && (
-                    <button
-                      onClick={() => setShowResetConfirm(true)}
-                      className="text-slate-600 hover:text-slate-400 text-xs transition-colors"
-                    >
-                      Start over
-                    </button>
-                  )}
                   <button
                     onClick={handleSignOut}
                     className="text-slate-500 hover:text-slate-300 text-xs transition-colors flex items-center gap-1"
@@ -322,27 +308,6 @@ export default function DashboardClient({
                   </button>
                 </div>
               </div>
-              {showResetConfirm && (
-                <div className="mt-2 bg-slate-900 border border-slate-700 rounded-xl p-3 space-y-2">
-                  <p className="text-xs text-slate-300">Delete all results and start over?</p>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setShowResetConfirm(false)}
-                      disabled={resetting}
-                      className="flex-1 text-xs py-1.5 rounded-lg border border-slate-700 text-slate-400 hover:text-slate-200 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleReset}
-                      disabled={resetting}
-                      className="flex-1 text-xs py-1.5 rounded-lg bg-red-900/60 border border-red-800/60 text-red-300 hover:bg-red-800/60 transition-colors disabled:opacity-50"
-                    >
-                      {resetting ? 'Resetting…' : 'Yes, reset'}
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Stage progress */}

@@ -36,11 +36,11 @@ Violation looks like: Treating all extracted preferences as equally certain. Rem
 
 ## Multi-source job fetching with deduplication
 
-Decision: Jobs are fetched from Remotive, Adzuna, and JSearch (RapidAPI) in parallel. Deduplication is by `(title, company, location)` tuple. Source is tracked per job.
+Decision: Jobs are fetched from Remotive, Adzuna, and JSearch (RapidAPI) in parallel. Remotive and JSearch use their source-issued external IDs for deduplication. Adzuna deduplicates by normalized `(title, company)` because it republishes the same role once per city. Source is tracked per job.
 
 Why: No single job board has complete coverage. Deduplication prevents the same listing from appearing multiple times with different scores.
 
-Violation looks like: Adding a new job source without implementing deduplication against existing records. Storing raw API responses without normalizing the tuple key.
+Violation looks like: Adding a new job source without a stable source identifier or a normalized deduplication rule. Treating Adzuna's city variants as distinct jobs.
 
 ---
 
@@ -61,3 +61,13 @@ Decision: Claude extraction errors, job fetch failures, and scoring anomalies ar
 Why: Errors in async extraction pipelines are invisible without persistence. The admin dashboard reads from error_log to surface issues.
 
 Violation looks like: Using console.log for extraction errors in Edge Functions. Swallowing errors silently when a job fetch API returns unexpected data.
+
+---
+
+## Career work is never deleted through the app
+
+Decision: The app does not provide a self-service destructive reset. Existing career profiles and completed work are retained unless Brett explicitly authorizes a recovery operation outside the app. Deliberately editing an earlier stage may invalidate downstream work through the controlled stage-navigation flow.
+
+Why: Career interviews are costly to recreate and customer data loss is unacceptable. A reset action previously deleted the complete profile graph after a single confirmation.
+
+Violation looks like: Adding a dashboard control or API route that deletes a career profile and its full dependent graph without an explicit, externally reviewed recovery process.

@@ -211,13 +211,18 @@ search_terms: 2-3 JSearch queries for adjacent role discovery based on their int
 // ── Route handler ────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
+  let profileId: string | null = null
+  let requestedStage: number | null = null
+
   try {
     const supabase = await createServiceClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { stage, answer, profileId } = await request.json()
-    if (!stage || !answer || !profileId) {
+    const { stage: rawStage, answer, profileId: requestedProfileId } = await request.json()
+    requestedStage = Number(rawStage)
+    profileId = typeof requestedProfileId === 'string' ? requestedProfileId : null
+    if (!Number.isInteger(requestedStage) || requestedStage < 2 || requestedStage > 7 || typeof answer !== 'string' || !answer.trim() || !profileId) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
     }
 
@@ -229,6 +234,14 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (!profile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
+    if (requestedStage !== profile.stage_completed + 1) {
+      return NextResponse.json(
+        { error: 'Complete earlier stages before submitting this stage. Navigate back before editing a completed stage.' },
+        { status: 409 }
+      )
+    }
+
+    const stage = requestedStage
 
     // ── Stage 2: Hard constraints + Remotive ─────────────────────────────────
     if (stage === 2) {
@@ -594,6 +607,8 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     console.error('[submit-stage]', err)
     await logError({
+      profile_id: profileId,
+      stage: requestedStage,
       error_message: err instanceof Error ? err.message : 'Internal server error',
       source: 'submit-stage',
     })

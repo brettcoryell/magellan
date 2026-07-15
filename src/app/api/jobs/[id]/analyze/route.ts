@@ -27,17 +27,20 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  let profileId: string | null = null
+
   try {
     const { id } = await params
     const supabase = await createServiceClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { profileId } = await request.json()
+    const { profileId: requestedProfileId } = await request.json()
+    profileId = typeof requestedProfileId === 'string' ? requestedProfileId : null
     if (!profileId) return NextResponse.json({ error: 'Missing profileId' }, { status: 400 })
 
     const [{ data: job }, { data: profile }] = await Promise.all([
-      supabase.from('job_postings').select('*').eq('id', id).single(),
+      supabase.from('job_postings').select('*').eq('id', id).eq('profile_id', profileId).single(),
       supabase.from('career_profiles').select('*').eq('id', profileId).eq('user_id', user.id).single(),
     ])
 
@@ -107,7 +110,7 @@ Write as if you are a trusted advisor who will be held accountable for this advi
 
     return NextResponse.json({ analysis, cached: false })
   } catch (err) {
-    await logError({ error_message: err instanceof Error ? err.message : String(err), source: 'analyze' })
+    await logError({ profile_id: profileId, error_message: err instanceof Error ? err.message : String(err), source: 'analyze' })
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Internal server error' },
       { status: 500 }

@@ -19,12 +19,15 @@ import {
 export const maxDuration = 60
 
 export async function POST(request: NextRequest) {
+  let profileId: string | null = null
+
   try {
     const supabase = await createServiceClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { profileId } = await request.json()
+    const { profileId: requestedProfileId } = await request.json()
+    profileId = typeof requestedProfileId === 'string' ? requestedProfileId : null
     if (!profileId) return NextResponse.json({ error: 'Missing profileId' }, { status: 400 })
 
     const { data: profile } = await supabase
@@ -40,53 +43,63 @@ export async function POST(request: NextRequest) {
     const pref = (profile.preference_profile || {}) as Partial<PreferenceProfile>
     const { titleQueries, keywordQueries } = getSearchQueries(pref)
 
-    // Delete existing main job postings
-    await supabase
-      .from('job_postings')
-      .delete()
-      .eq('profile_id', profileId)
-      .eq('source_type', 'main')
-
     const allRawJobs: ReturnType<typeof normalizeRemotiveJob | typeof normalizeAdzunaJob | typeof normalizeJSearchJob>[] = []
 
-    // Stage 2+: Remotive
-    if (stageCompleted >= 2) {
-      for (const q of titleQueries.slice(0, 2)) {
-        const jobs = await fetchRemotive(q)
-        for (const j of jobs) allRawJobs.push(normalizeRemotiveJob(j, profileId, 2))
-      }
+    const [remotiveResults, adzunaResults, jSearchResults] = await Promise.all([
+      stageCompleted >= 2
+        ? Promise.all(titleQueries.slice(0, 2).map(q => fetchRemotive(q)))
+        : Promise.resolve([]),
+      stageCompleted >= 3
+        ? Promise.all(keywordQueries.slice(0, 2).map(q => fetchAdzuna(sanitizeForAdzuna(q))))
+        : Promise.resolve([]),
+      stageCompleted >= 4
+        ? Promise.all(titleQueries.slice(0, 3).map(q => fetchJSearch(q)))
+        : Promise.resolve([]),
+    ])
+
+    for (const jobs of remotiveResults) {
+      for (const job of jobs) allRawJobs.push(normalizeRemotiveJob(job, profileId, 2))
+    }
+    for (const jobs of adzunaResults) {
+      for (const job of jobs) allRawJobs.push(normalizeAdzunaJob(job as Record<string, unknown>, profileId, 'main', 3))
     }
 
-    // Stage 3+: Adzuna
-    if (stageCompleted >= 3) {
-      for (const q of keywordQueries.slice(0, 2)) {
-        const adzunaQ = sanitizeForAdzuna(q)
-        const jobs = await fetchAdzuna(adzunaQ)
-        for (const j of jobs) allRawJobs.push(normalizeAdzunaJob(j as Record<string, unknown>, profileId, 'main', 3))
-      }
+    const anyJSearch = jSearchResults.some(({ jobs }) => jobs.length > 0)
+    for (const { jobs } of jSearchResults) {
+      for (const job of jobs) allRawJobs.push(normalizeJSearchJob(job, profileId, 'main', 4))
     }
 
-    // Stage 4+: JSearch (with Adzuna fallback)
-    if (stageCompleted >= 4) {
-      const jSearchResults = await Promise.all(titleQueries.slice(0, 3).map(q => fetchJSearch(q)))
-      let anyJSearch = false
-      for (const { jobs } of jSearchResults) {
-        if (jobs.length > 0) anyJSearch = true
-        for (const j of jobs) allRawJobs.push(normalizeJSearchJob(j, profileId, 'main', 4))
-      }
-      if (!anyJSearch) {
-        const fallbackResults = await Promise.all(titleQueries.slice(0, 2).map(q => fetchAdzuna(sanitizeForAdzuna(q))))
-        for (const jobs of fallbackResults) {
-          for (const j of jobs) allRawJobs.push(normalizeAdzunaJob(j as Record<string, unknown>, profileId, 'main', 4))
+    // JSearch is optional; fall back only after its parallel requests produce no jobs.
+    if (stageCompleted >= 4 && !anyJSearch) {
+      const fallbackResults = await Promise.all(
+        titleQueries.slice(0, 2).map(q => fetchAdzuna(sanitizeForAdzuna(q)))
+      )
+      for (const jobs of fallbackResults) {
+        for (const job of jobs) {
+          allRawJobs.push(normalizeAdzunaJob(job as Record<string, unknown>, profileId, 'main', 4))
         }
       }
     }
 
-    if (allRawJobs.length > 0) {
-      await supabase
-        .from('job_postings')
-        .upsert(allRawJobs, { onConflict: 'profile_id,dedup_key', ignoreDuplicates: true })
+    if (allRawJobs.length === 0) {
+      return NextResponse.json(
+        { error: 'No fresh job results were returned. Your existing results have been kept.' },
+        { status: 502 }
+      )
     }
+
+    // Do not clear a customer's current results until replacement results exist.
+    const { error: deleteError } = await supabase
+      .from('job_postings')
+      .delete()
+      .eq('profile_id', profileId)
+      .eq('source_type', 'main')
+    if (deleteError) throw deleteError
+
+    const { error: upsertError } = await supabase
+      .from('job_postings')
+      .upsert(allRawJobs, { onConflict: 'profile_id,dedup_key', ignoreDuplicates: true })
+    if (upsertError) throw upsertError
 
     await extractAndUpdateSignals(supabase, profileId)
     await rescoreAllJobs(supabase, profileId, pref, stageCompleted)
@@ -123,6 +136,7 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     console.error('[refresh-jobs]', err)
     await logError({
+      profile_id: profileId,
       error_message: err instanceof Error ? err.message : 'Internal server error',
       source: 'refresh-jobs',
     })
